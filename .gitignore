@@ -1,8 +1,14 @@
-.idea
-out
-target
-*.iml
+#Project
+/out/
+/target/
+/lib/
 log
+*.class
 *.patch
 
+#Intellij IDEA
+/.idea/
+*.iml
 
+#MacOS files:
+*.DS_Store
