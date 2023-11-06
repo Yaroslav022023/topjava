@@ -12,27 +12,28 @@ import java.util.stream.Collectors;
 public class MealsUtil {
 
     public static List<MealTo> filteredByStreams(List<Meal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
-                .collect(
-                        Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
-                );
+        Map<LocalDate, Integer> caloriesSumByDate = getCaloriesSumByDate(meals);
         return meals.stream()
                 .filter(meal -> TimeUtil.isBetweenHalfOpen(meal.getTime(), startTime, endTime))
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }
 
-    private static MealTo createTo(Meal meal, boolean excess) {
-        return new MealTo(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
-    }
-
     public static List<MealTo> getMealsWithExcess(List<Meal> meals, int caloriesPerDay) {
-        Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
-                .collect(
-                        Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
-                );
+        Map<LocalDate, Integer> caloriesSumByDate = getCaloriesSumByDate(meals);
         return meals.stream()
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
+    }
+
+    private static Map<LocalDate, Integer> getCaloriesSumByDate(List<Meal> meals) {
+        return meals.stream()
+                .collect(
+                        Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories))
+                );
+    }
+
+    private static MealTo createTo(Meal meal, boolean excess) {
+        return new MealTo(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
     }
 }

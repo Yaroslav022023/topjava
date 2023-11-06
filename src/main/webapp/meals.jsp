@@ -12,9 +12,6 @@
 <body>
 <h3><a href="index.html">Home</a></h3>
 <hr>
-<!-- 1. Зарефакторить 2 метода, которые используют stream в классе MealsUtil
-     2. Реализовать эту jsp
--->
 <table class="table-bordered">
     <tr>
         <th>Date</th>
