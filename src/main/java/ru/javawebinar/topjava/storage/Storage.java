@@ -11,7 +11,7 @@ public interface Storage {
 
     Meal get(Integer id);
 
-    void update(Meal meal);
-
     void delete(Integer id);
+
+    int getSize();
 }

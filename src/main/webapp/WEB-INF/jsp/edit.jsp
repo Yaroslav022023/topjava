@@ -11,22 +11,22 @@
 <div class="form-container">
     <h2>Edit Meal</h2>
     <form action="meals" method="post">
-        <input type="hidden" id="id" name="id" value="${id}">
+        <input type="hidden" id="id" name="id" value="${meal.id}">
         <div class="form-input">
             <label for="dateTime">DateTime:</label>
-            <input type="datetime-local" id="dateTime" name="dateTime" value="2020-01-30T10:00">
+            <input type="datetime-local" id="dateTime" name="dateTime" value="${meal.dateTime}" required>
         </div>
         <div class="form-input">
             <label for="description">Description:</label>
-            <input type="text" id="description" name="description" value="Завтрак">
+            <input type="text" id="description" name="description" value="${meal.description}" required>
         </div>
         <div class="form-input">
             <label for="calories">Calories:</label>
-            <input type="number" id="calories" name="calories" value="500">
+            <input type="number" id="calories" name="calories" value="${meal.calories}" required>
         </div>
         <div class="form-input">
             <input type="submit" value="Save">
-            <input type="button" value="Cancel" onclick="history.back();">
+            <input type="button" value="Cancel" onclick="window.history.back();">
         </div>
     </form>
 </div>

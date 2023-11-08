@@ -28,28 +28,27 @@ public class MealDao implements Storage {
 
     @Override
     public void save(Meal meal) {
-        log.info("save() Meal: Execution action...");
+        log.info(String.format("save() id [%s]: Execution action...", meal.getId()));
         storage.put(meal.getId(), meal);
-        log.info("save() Meal: Finish!");
+        log.info(String.format("save() id [%s]: Finish!", meal.getId()));
     }
 
     @Override
     public Meal get(Integer id) {
-        log.info("get(): Execution action...");
+        log.info(String.format("get() id [%s]: Execution action...", id));
         return storage.get(id);
     }
 
     @Override
-    public void update(Meal meal) {
-        log.info("update(): Execution action...");
-        storage.put(meal.getId(), meal);
-        log.info("update(): Finish!");
+    public void delete(Integer id) {
+        log.info(String.format("delete() id [%s]: Execution action...", id));
+        storage.remove(id);
+        log.info(String.format("delete() id [%s]: Finish!", id));
     }
 
     @Override
-    public void delete(Integer id) {
-        log.info("delete(): Execution action...");
-        storage.remove(id);
-        log.info("delete(): Finish!");
+    public int getSize() {
+        log.info(String.format("getSize(): size = [%s]", storage.size()));
+        return storage.size();
     }
 }
