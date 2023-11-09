@@ -4,14 +4,14 @@ import ru.javawebinar.topjava.model.Meal;
 
 import java.util.List;
 
-public interface Storage {
+public interface MealStorage {
     List<Meal> getAll();
 
-    void save(Meal meal);
+    Meal save(Meal meal);
 
-    Meal get(Integer id);
+    Meal get(int id);
 
-    void delete(Integer id);
+    void update(Meal meal);
 
-    int getSize();
+    void delete(int id);
 }

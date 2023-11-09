@@ -12,7 +12,7 @@
 <body>
 <jsp:include page="fragments/header.jsp"/>
 <h2>Meals</h2>
-<h3><a href="meals?action=create">Add Meal</a></h3>
+<h3><a href="meals?action=save">Add Meal</a></h3>
 <table class="table-bordered">
     <tr>
         <th>Date</th>
@@ -23,10 +23,10 @@
     </tr>
     <c:forEach var="mealTo" items="${mealsToList}">
         <jsp:useBean id="mealTo" type="ru.javawebinar.topjava.model.MealTo"/>
-        <tr>
-            <td style="color: ${mealTo.excess ? 'red' : 'green'};">${mealTo.dateTimeFormatted}</td>
-            <td style="color: ${mealTo.excess ? 'red' : 'green'};">${mealTo.description}</td>
-            <td style="color: ${mealTo.excess ? 'red' : 'green'};">${mealTo.calories}</td>
+        <tr style="color: ${mealTo.excess ? 'red' : 'green'};">
+            <td>${mealTo.dateTime}</td>
+            <td>${mealTo.description}</td>
+            <td>${mealTo.calories}</td>
             <td><a href="meals?id=${mealTo.id}&action=update">Update</a></td>
             <td><a href="meals?id=${mealTo.id}&action=delete">Delete</a></td>
         </tr>
