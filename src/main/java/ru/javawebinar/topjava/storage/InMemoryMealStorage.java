@@ -14,7 +14,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class InMemoryMealStorage implements MealStorage {
     private static final Logger log = getLogger(InMemoryMealStorage.class);
     private final ConcurrentHashMap<Integer, Meal> storage = new ConcurrentHashMap<>();
-    private static final AtomicInteger id = new AtomicInteger(7);
+    private final AtomicInteger id = new AtomicInteger();
 
     public InMemoryMealStorage() {
         log.debug("MealDao: Initializing...");
