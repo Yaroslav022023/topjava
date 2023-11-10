@@ -30,14 +30,10 @@ public class InMemoryMealStorage implements MealStorage {
 
     @Override
     public Meal create(Meal meal) {
-        log.debug("save() id {}: Execution action...", meal.getId());
-        if (meal.getId() == null) {
-            int newId = id.incrementAndGet();
-            meal.setId(newId);
-            log.debug("generateUniqueId(): Generated a new id = {}", newId);
-        }
+        log.debug("create() new Meal: Execution action...");
+        meal.setId(id.incrementAndGet());
         storage.put(meal.getId(), meal);
-        log.debug("save() id {}: Finish!", meal.getId());
+        log.debug("create() id {}: Finish!", meal.getId());
         return meal;
     }
 
