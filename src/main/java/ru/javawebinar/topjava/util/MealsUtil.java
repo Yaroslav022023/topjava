@@ -8,11 +8,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MealsUtil {
     public static final List<Meal> meals = Arrays.asList(
@@ -38,14 +36,10 @@ public class MealsUtil {
                                             LocalTime endTime, int caloriesPerDay) {
         Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
                 .collect(Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories)));
-        Stream<Meal> stream = meals.stream();
-        if (startTime != null && endTime != null) {
-            stream = stream.filter(meal -> TimeUtil.isBetweenHalfOpen(meal.getTime(), startTime, endTime));
-        }
-        return stream
-                .sorted(Comparator.comparing(Meal::getDateTime))
-                .map(meal -> new MealTo(meal.getId(), TimeUtil.getDateTimeFormatted(meal.getDateTime()),
-                        meal.getDescription(), meal.getCalories(),
+        return meals.stream()
+                .filter(meal -> (startTime == null || !meal.getTime().isBefore(startTime)) &&
+                        (endTime == null || !meal.getTime().isAfter(endTime)))
+                .map(meal -> new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(),
                         caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }

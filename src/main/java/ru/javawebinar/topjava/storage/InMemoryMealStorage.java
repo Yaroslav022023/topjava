@@ -7,16 +7,18 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class MapMealStorage implements MealStorage {
-    private static final Logger log = getLogger(MapMealStorage.class);
+public class InMemoryMealStorage implements MealStorage {
+    private static final Logger log = getLogger(InMemoryMealStorage.class);
     private final ConcurrentHashMap<Integer, Meal> storage = new ConcurrentHashMap<>();
+    private static final AtomicInteger id = new AtomicInteger(7);
 
-    public MapMealStorage() {
+    public InMemoryMealStorage() {
         log.debug("MealDao: Initializing...");
-        MealsUtil.meals.forEach(this::save);
+        MealsUtil.meals.forEach(this::create);
         log.debug("MealDao: storage created");
     }
 
@@ -27,8 +29,13 @@ public class MapMealStorage implements MealStorage {
     }
 
     @Override
-    public Meal save(Meal meal) {
+    public Meal create(Meal meal) {
         log.debug("save() id {}: Execution action...", meal.getId());
+        if (meal.getId() == null) {
+            int newId = id.incrementAndGet();
+            meal.setId(newId);
+            log.debug("generateUniqueId(): Generated a new id = {}", newId);
+        }
         storage.put(meal.getId(), meal);
         log.debug("save() id {}: Finish!", meal.getId());
         return meal;

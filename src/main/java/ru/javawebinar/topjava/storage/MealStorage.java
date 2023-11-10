@@ -7,7 +7,7 @@ import java.util.List;
 public interface MealStorage {
     List<Meal> getAll();
 
-    Meal save(Meal meal);
+    Meal create(Meal meal);
 
     Meal get(int id);
 
