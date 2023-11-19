@@ -19,15 +19,22 @@ import java.util.Objects;
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
 
+    private ConfigurableApplicationContext appCtx;
+
     private MealRestController repository;
 
     @Override
     public void init() {
         log.debug("Initialization MealServlet...");
-        try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
-            repository = appCtx.getBean(MealRestController.class);
-        }
+        appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        repository = appCtx.getBean(MealRestController.class);
         log.debug("Initialization MealServlet: Finish!");
+    }
+
+    @Override
+    public void destroy() {
+        appCtx.close();
+        log.debug("MealServlet destroyed");
     }
 
     @Override
@@ -67,16 +74,7 @@ public class MealServlet extends HttpServlet {
                 break;
             case "all":
             default:
-                String startDate = request.getParameter("startDate");
-                String endDate = request.getParameter("endDate");
-                String startTime = request.getParameter("startTime");
-                String endTime = request.getParameter("endTime");
-                if (startDate != null || endDate != null || startTime != null || endTime != null) {
-                    log.info("getAllFiltered");
-                    request.setAttribute("meals", repository.getAllFiltered(startDate, endDate, startTime, endTime));
-                    request.getRequestDispatcher("/meals.jsp").forward(request, response);
-                    break;
-                }
+                if (getAllFiltered(request, response)) break;
                 log.info("getAll");
                 request.setAttribute("meals", repository.getAll());
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
@@ -87,5 +85,20 @@ public class MealServlet extends HttpServlet {
     private int getId(HttpServletRequest request) {
         String paramId = Objects.requireNonNull(request.getParameter("id"));
         return Integer.parseInt(paramId);
+    }
+
+    private boolean getAllFiltered(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        String startTime = request.getParameter("startTime");
+        String endTime = request.getParameter("endTime");
+        if (startDate != null || endDate != null || startTime != null || endTime != null) {
+            log.info("getAllFiltered");
+            request.setAttribute("meals", repository.getAllFiltered(startDate, endDate, startTime, endTime));
+            request.getRequestDispatcher("/meals.jsp").forward(request, response);
+            return true;
+        }
+        return false;
     }
 }

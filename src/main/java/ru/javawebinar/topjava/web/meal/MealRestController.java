@@ -6,10 +6,11 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.util.List;
 
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
+import static ru.javawebinar.topjava.web.SecurityUtil.getAuthUserId;
 
 @Controller
 public class MealRestController {
@@ -24,26 +25,26 @@ public class MealRestController {
 
     public List<MealTo> getAll() {
         log.info("getAll");
-        return service.getAll();
+        return service.getAll(SecurityUtil.getAuthUserId());
     }
 
     public List<MealTo> getAllFiltered(String startDate, String endDate, String startTime, String endTime) {
         log.info("getAllFiltered");
-        return service.getAllFiltered(startDate, endDate, startTime, endTime);
+        return service.getAllFiltered(SecurityUtil.getAuthUserId(), startDate, endDate, startTime, endTime);
     }
 
     public Meal get(int mealId) {
         log.info("get {}", mealId);
-        return service.get(authUserId(), mealId);
+        return service.get(getAuthUserId(), mealId);
     }
 
     public Meal save(Meal meal) {
         log.info("save {}", meal.getId());
-        return service.save(authUserId(), meal);
+        return service.save(getAuthUserId(), meal);
     }
 
     public void delete(int mealId) {
         log.info("delete {}", mealId);
-        service.delete(authUserId(), mealId);
+        service.delete(getAuthUserId(), mealId);
     }
 }

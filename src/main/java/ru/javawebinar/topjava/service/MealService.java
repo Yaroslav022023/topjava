@@ -9,7 +9,6 @@ import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.util.List;
 
-import static ru.javawebinar.topjava.util.DateTimeUtil.*;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
 
 @Service
@@ -33,16 +32,11 @@ public class MealService {
         return checkNotFoundWithId(repository.get(userId, mealId), mealId);
     }
 
-    public List<MealTo> getAll() {
-        return MealsUtil.getTos(repository.getAll(), SecurityUtil.authUserCaloriesPerDay());
+    public List<MealTo> getAll(int userId) {
+        return MealsUtil.getTos(repository.getAll(userId), SecurityUtil.authUserCaloriesPerDay());
     }
 
-    public List<MealTo> getAllFiltered(String startDate, String endDate, String startTime, String endTime) {
-        return MealsUtil.getFilteredTos(getAllFilteredByDate(startDate, endDate),
-                SecurityUtil.authUserCaloriesPerDay(), toLocalTimeOrMin(startTime), toLocalTimeOrMax(endTime));
-    }
-
-    private List<Meal> getAllFilteredByDate(String startDate, String endDate) {
-        return MealsUtil.getFilteredByDate(repository.getAll(), toLocalDateOrMin(startDate), toLocalDateOrMax(endDate));
+    public List<MealTo> getAllFiltered(int userId, String startDate, String endDate, String startTime, String endTime) {
+        return repository.getAllFiltered(userId, startDate, endDate, startTime, endTime);
     }
 }

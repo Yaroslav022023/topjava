@@ -3,18 +3,20 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.AutoCloseableLock;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+
+import static ru.javawebinar.topjava.util.DateTimeUtil.*;
+import static ru.javawebinar.topjava.util.DateTimeUtil.toLocalDateOrMax;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
@@ -23,7 +25,7 @@ public class InMemoryMealRepository implements MealRepository {
     private final Map<Integer, Lock> locks = new ConcurrentHashMap<>();
 
     {
-        MealsUtil.meals.forEach(meal -> save(SecurityUtil.authUserId(), meal));
+        MealsUtil.meals.forEach(meal -> save(SecurityUtil.getAuthUserId(), meal));
     }
 
     @Override
@@ -75,11 +77,22 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public Collection<Meal> getAll() {
-        return repository.values().stream()
-                .parallel()
-                .flatMap(map -> map.values().stream())
+    public Collection<Meal> getAll(int userId) {
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        if (userMeals == null) {
+            return Collections.emptyList();
+        }
+        return userMeals.values().stream()
                 .sorted(Comparator.comparing(Meal::getDate).reversed())
                 .collect(Collectors.toList());
+    }
+
+    public List<MealTo> getAllFiltered(int userId, String startDate, String endDate, String startTime, String endTime) {
+        return MealsUtil.getFilteredTos(getAllFilteredByDate(userId, startDate, endDate),
+                SecurityUtil.authUserCaloriesPerDay(), toLocalTimeOrMin(startTime), toLocalTimeOrMax(endTime));
+    }
+
+    private List<Meal> getAllFilteredByDate(int userId, String startDate, String endDate) {
+        return MealsUtil.getFilteredByDate(getAll(userId), toLocalDateOrMin(startDate), toLocalDateOrMax(endDate));
     }
 }
