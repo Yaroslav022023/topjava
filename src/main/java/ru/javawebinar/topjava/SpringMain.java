@@ -38,7 +38,7 @@ public class SpringMain {
             System.out.println(mealRestController.get(1));
 
             System.out.println("-------------------save(): meal");
-            System.out.println(mealRestController.save(new Meal(LocalDateTime.of(
+            System.out.println(mealRestController.create(new Meal(LocalDateTime.of(
                     2023, Month.FEBRUARY, 3, 12, 0), "Test dish", 1010)));
 
             System.out.println("-------------------delete(): meal");

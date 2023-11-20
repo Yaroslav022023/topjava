@@ -12,24 +12,8 @@ public class DateTimeUtil {
         return lt.compareTo(startTime) >= 0 && lt.compareTo(endTime) < 0;
     }
 
-    public static boolean isBetweenHalfOpenByDate(LocalDate ld, LocalDate startDate, LocalDate endDate) {
+    public static boolean isBetweenInclusiveByDate(LocalDate ld, LocalDate startDate, LocalDate endDate) {
         return ld.compareTo(startDate) >= 0 && ld.compareTo(endDate) <= 0;
-    }
-
-    public static LocalDate toLocalDateOrMin(String startDate) {
-        return startDate == null || startDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(startDate);
-    }
-
-    public static LocalDate toLocalDateOrMax(String endDate) {
-        return endDate == null || endDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(endDate);
-    }
-
-    public static LocalTime toLocalTimeOrMin(String startTime) {
-        return startTime == null || startTime.isEmpty() ? LocalTime.MIN : LocalTime.parse(startTime);
-    }
-
-    public static LocalTime toLocalTimeOrMax(String endTime) {
-        return endTime == null || endTime.isEmpty() ? LocalTime.MAX : LocalTime.parse(endTime);
     }
 
     public static String toString(LocalDateTime ldt) {

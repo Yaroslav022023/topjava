@@ -3,81 +3,54 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.AutoCloseableLock;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
-import static ru.javawebinar.topjava.util.DateTimeUtil.*;
-import static ru.javawebinar.topjava.util.DateTimeUtil.toLocalDateOrMax;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
     private final Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
-    private final Map<Integer, Lock> locks = new ConcurrentHashMap<>();
 
     {
-        MealsUtil.meals.forEach(meal -> save(SecurityUtil.getAuthUserId(), meal));
+        MealsUtil.meals1.forEach(meal -> save(1, meal));
+        MealsUtil.meals2.forEach(meal -> save(2, meal));
     }
 
     @Override
     public Meal save(int userId, Meal meal) {
-        try (AutoCloseableLock ignored = new AutoCloseableLock(getLock(userId))) {
-            Map<Integer, Meal> userMeals =
-                    repository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
-            if (meal.isNew()) {
-                meal.setId(counter.incrementAndGet());
-                userMeals.put(meal.getId(), meal);
-                return meal;
-            } else {
-                if (userMeals.containsKey(meal.getId())) {
-                    userMeals.replace(meal.getId(), meal);
-                    return meal;
-                } else {
-                    return null;
-                }
-            }
+        Map<Integer, Meal> userMeals = repository.computeIfAbsent(userId, k -> new ConcurrentHashMap<>());
+        if (meal.isNew()) {
+            meal.setId(counter.incrementAndGet());
+            userMeals.put(meal.getId(), meal);
+        } else {
+            if (userMeals.computeIfPresent(meal.getId(), (key, value) -> meal) == null) return null;
         }
+        return meal;
     }
 
     @Override
     public boolean delete(int userId, int mealId) {
-        try (AutoCloseableLock ignored = new AutoCloseableLock(getLock(userId))) {
-            if (isMealBelongsToUser(userId, mealId)) {
-                return repository.get(userId).remove(mealId) != null;
-            }
-            return false;
-        }
-    }
-
-    private Lock getLock(int userId) {
-        locks.computeIfAbsent(userId, k -> new ReentrantLock());
-        return locks.get(userId);
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return userMeals != null && userMeals.remove(mealId) != null;
     }
 
     @Override
     public Meal get(int userId, int mealId) {
-        if (isMealBelongsToUser(userId, mealId)) {
-            return repository.get(userId).get(mealId);
-        }
-        return null;
-    }
-
-    private boolean isMealBelongsToUser(int userId, int mealId) {
         Map<Integer, Meal> userMeals = repository.get(userId);
-        return userMeals != null && userMeals.containsKey(mealId);
+        return userMeals != null ? userMeals.get(mealId) : null;
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
+    public List<Meal> getAll(int userId) {
         Map<Integer, Meal> userMeals = repository.get(userId);
         if (userMeals == null) {
             return Collections.emptyList();
@@ -87,12 +60,12 @@ public class InMemoryMealRepository implements MealRepository {
                 .collect(Collectors.toList());
     }
 
-    public List<MealTo> getAllFiltered(int userId, String startDate, String endDate, String startTime, String endTime) {
-        return MealsUtil.getFilteredTos(getAllFilteredByDate(userId, startDate, endDate),
-                SecurityUtil.authUserCaloriesPerDay(), toLocalTimeOrMin(startTime), toLocalTimeOrMax(endTime));
+    public List<Meal> getAllFiltered(int userId, LocalDate startDate, LocalDate endDate,
+                                     LocalTime startTime, LocalTime endTime) {
+        return MealsUtil.getFilteredByTime(getAllFilteredByDate(userId, startDate, endDate), startTime, endTime);
     }
 
-    private List<Meal> getAllFilteredByDate(int userId, String startDate, String endDate) {
-        return MealsUtil.getFilteredByDate(getAll(userId), toLocalDateOrMin(startDate), toLocalDateOrMax(endDate));
+    private List<Meal> getAllFilteredByDate(int userId, LocalDate startDate, LocalDate endDate) {
+        return MealsUtil.getFilteredByDate(getAll(userId), startDate, endDate);
     }
 }

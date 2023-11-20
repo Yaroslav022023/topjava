@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -47,8 +49,13 @@ public class MealServlet extends HttpServlet {
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
 
-        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        repository.save(meal);
+        if (meal.isNew()) {
+            log.info("Create {}", meal);
+            repository.create(meal);
+        } else {
+            log.info("Update {}", meal);
+            repository.update(meal, Integer.parseInt(id));
+        }
         response.sendRedirect("meals");
     }
 
@@ -89,16 +96,27 @@ public class MealServlet extends HttpServlet {
 
     private boolean getAllFiltered(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String startDate = request.getParameter("startDate");
-        String endDate = request.getParameter("endDate");
-        String startTime = request.getParameter("startTime");
-        String endTime = request.getParameter("endTime");
+        LocalDate startDate = getLocalDateParameter(request, "startDate");
+        LocalDate endDate = getLocalDateParameter(request, "endDate");
+        LocalTime startTime = getLocalTimeParameter(request, "startTime");
+        LocalTime endTime = getLocalTimeParameter(request, "endTime");
+
         if (startDate != null || endDate != null || startTime != null || endTime != null) {
-            log.info("getAllFiltered");
             request.setAttribute("meals", repository.getAllFiltered(startDate, endDate, startTime, endTime));
             request.getRequestDispatcher("/meals.jsp").forward(request, response);
+            log.info("getAllFiltered");
             return true;
         }
         return false;
+    }
+
+    private LocalDate getLocalDateParameter(HttpServletRequest request, String parameterName) {
+        String parameterValue = request.getParameter(parameterName);
+        return parameterValue != null && !parameterValue.isEmpty() ? LocalDate.parse(parameterValue) : null;
+    }
+
+    private LocalTime getLocalTimeParameter(HttpServletRequest request, String parameterName) {
+        String parameterValue = request.getParameter(parameterName);
+        return parameterValue != null && !parameterValue.isEmpty() ? LocalTime.parse(parameterValue) : null;
     }
 }
