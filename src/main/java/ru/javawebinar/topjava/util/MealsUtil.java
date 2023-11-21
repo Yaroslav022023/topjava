@@ -7,10 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -51,8 +48,18 @@ public class MealsUtil {
         return filterByPredicate(meals, caloriesPerDay, meal -> true);
     }
 
-    public static List<MealTo> getFilteredTos(Collection<Meal> meals, int caloriesPerDay) {
-        return filterByPredicate(meals, caloriesPerDay, meal -> true);
+    public static List<MealTo> getFilteredTos(Collection<Meal> filteredMeals, List<MealTo> tos) {
+        return filteredMeals.stream()
+                .filter(meal -> tos.stream().anyMatch(to -> Objects.equals(to.getId(), meal.getId())))
+                .map(meal -> {
+                    boolean excess = tos.stream()
+                            .filter(to -> Objects.equals(to.getId(), meal.getId()))
+                            .findFirst()
+                            .map(MealTo::isExcess)
+                            .get();
+                    return createTo(meal, excess);
+                })
+                .collect(Collectors.toList());
     }
 
     private static List<MealTo> filterByPredicate(Collection<Meal> meals, int caloriesPerDay, Predicate<Meal> filter) {

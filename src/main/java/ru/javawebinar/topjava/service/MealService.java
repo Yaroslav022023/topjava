@@ -21,7 +21,7 @@ public class MealService {
         this.repository = repository;
     }
 
-    public Meal save(int userId, Meal meal) {
+    public Meal create(int userId, Meal meal) {
         return repository.save(userId, meal);
     }
 
@@ -40,7 +40,7 @@ public class MealService {
     public List<MealTo> getAllFiltered(int userId, int caloriesPerDay, LocalDate startDate,
                                        LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         return MealsUtil.getFilteredTos(repository.getAllFiltered(userId, startDate, endDate,
-                startTime, endTime), caloriesPerDay);
+                startTime, endTime), getAll(userId, caloriesPerDay));
     }
 
     public void update(int userId, Meal meal) {
