@@ -55,6 +55,7 @@ public class MealsUtil {
     public static List<Meal> getFilteredDailyMeals(Map<Integer, Meal> meals, LocalDate startDate, LocalDate endDate) {
         return meals.values().stream()
                 .filter(meal -> DateTimeUtil.isBetweenInclusiveByDate(meal.getDate(), startDate, endDate))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 
