@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -37,34 +36,26 @@ public class MealsUtil {
         return filterByPredicate(meals, caloriesPerDay, meal -> true);
     }
 
+    public static List<MealTo> getFilteredTos(List<Meal> meals, int caloriesPerDay,
+                                              LocalTime startTime, LocalTime endTime) {
+        return filterByPredicate(meals, caloriesPerDay, meal ->
+                DateTimeUtil.isBetweenHalfOpenByTime(meal.getTime(), startTime, endTime));
+    }
+
     private static List<MealTo> filterByPredicate(Collection<Meal> meals, int caloriesPerDay, Predicate<Meal> filter) {
-        Map<LocalDate, Integer> caloriesSumByDate = getCaloriesSumByDate(meals);
+        Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
+                .collect(Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories)));
         return meals.stream()
                 .filter(filter)
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
-                .collect(Collectors.toList());
-    }
-
-    public static Map<Meal, Integer> getFilteredMealsWithDailyCalories(Map<Integer, Meal> meals,
-                                                                       LocalDate startDate, LocalDate endDate,
-                                                                       LocalTime startTime, LocalTime endTime) {
-        Map<LocalDate, Integer> caloriesSumByDate = getCaloriesSumByDate(meals.values());
-        return meals.values().stream()
-                .filter(meal -> DateTimeUtil.isBetweenInclusiveByDate(meal.getDate(), startDate, endDate)
-                        && DateTimeUtil.isBetweenHalfOpenByTime(meal.getTime(), startTime, endTime))
-                .collect(Collectors.toMap(Function.identity(), meal -> caloriesSumByDate.get(meal.getDate())));
-    }
-
-    public static List<MealTo> getFilteredTos(Map<Meal, Integer> filteredMealsWithDailyCalories, int caloriesPerDay) {
-        return filteredMealsWithDailyCalories.keySet().stream()
-                .map(meal -> createTo(meal, filteredMealsWithDailyCalories.get(meal) > caloriesPerDay))
                 .sorted(Comparator.comparing(MealTo::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 
-    private static Map<LocalDate, Integer> getCaloriesSumByDate(Collection<Meal> meals) {
-        return meals.stream()
-                .collect(Collectors.groupingBy(Meal::getDate, Collectors.summingInt(Meal::getCalories)));
+    public static List<Meal> getFilteredDailyMeals(Map<Integer, Meal> meals, LocalDate startDate, LocalDate endDate) {
+        return meals.values().stream()
+                .filter(meal -> DateTimeUtil.isBetweenInclusiveByDate(meal.getDate(), startDate, endDate))
+                .collect(Collectors.toList());
     }
 
     private static MealTo createTo(Meal meal, boolean excess) {
