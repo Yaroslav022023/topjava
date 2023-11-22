@@ -89,19 +89,19 @@
         <div class="row">
             <div class="col-md-3">
                 <label for="startDate">From date (including)</label>
-                <input type="date" class="form-control" name="startDate" id="startDate" value="${startDate}">
+                <input type="date" class="form-control" name="startDate" id="startDate" value="${param.startDate}">
             </div>
             <div class="col-md-3">
                 <label for="endDate">Up to date (including)</label>
-                <input type="date" class="form-control" name="endDate" id="endDate" value="${endDate}">
+                <input type="date" class="form-control" name="endDate" id="endDate" value="${param.endDate}">
             </div>
             <div class="col-md-3">
                 <label for="startTime">From time (including)</label>
-                <input type="time" class="form-control" name="startTime" id="startTime" value="${startTime}">
+                <input type="time" class="form-control" name="startTime" id="startTime" value="${param.startTime}">
             </div>
             <div class="col-md-3">
                 <label for="endTime">Up to time (excluding)</label>
-                <input type="time" class="form-control" name="endTime" id="endTime" value="${endTime}">
+                <input type="time" class="form-control" name="endTime" id="endTime" value="${param.endTime}">
             </div>
         </div>
         <div class="row">

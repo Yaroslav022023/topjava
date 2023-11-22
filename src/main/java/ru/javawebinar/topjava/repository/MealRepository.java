@@ -5,18 +5,17 @@ import ru.javawebinar.topjava.model.Meal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 public interface MealRepository {
     Meal save(int userId, Meal meal);
 
     boolean delete(int userId, int mealId);
 
-    // null if meal does not belong to userId
     Meal get(int userId, int mealId);
 
-    // ORDERED dateTime desc
     List<Meal> getAll(int userId);
 
-    List<Meal> getAllFiltered(int userId, LocalDate startDate, LocalDate endDate,
-                              LocalTime startTime, LocalTime endTime);
+    Map<Meal, Integer> getAllFiltered(int userId, LocalDate startDate, LocalDate endDate,
+                                      LocalTime startTime, LocalTime endTime);
 }

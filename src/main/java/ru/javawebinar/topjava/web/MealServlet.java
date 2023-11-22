@@ -112,13 +112,11 @@ public class MealServlet extends HttpServlet {
 
     private LocalDate getLocalDateParameter(HttpServletRequest request, String parameterName) {
         String parameterValue = request.getParameter(parameterName);
-        request.setAttribute(parameterName, parameterValue);
         return parameterValue != null && !parameterValue.isEmpty() ? LocalDate.parse(parameterValue) : null;
     }
 
     private LocalTime getLocalTimeParameter(HttpServletRequest request, String parameterName) {
         String parameterValue = request.getParameter(parameterName);
-        request.setAttribute(parameterName, parameterValue);
         return parameterValue != null && !parameterValue.isEmpty() ? LocalTime.parse(parameterValue) : null;
     }
 }

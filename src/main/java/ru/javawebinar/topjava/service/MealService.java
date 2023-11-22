@@ -40,7 +40,7 @@ public class MealService {
     public List<MealTo> getAllFiltered(int userId, int caloriesPerDay, LocalDate startDate,
                                        LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         return MealsUtil.getFilteredTos(repository.getAllFiltered(userId, startDate, endDate,
-                startTime, endTime), getAll(userId, caloriesPerDay));
+                startTime, endTime), caloriesPerDay);
     }
 
     public void update(int userId, Meal meal) {
