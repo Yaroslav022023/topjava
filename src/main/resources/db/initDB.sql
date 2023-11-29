@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS meals;
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS users;
 DROP SEQUENCE IF EXISTS global_seq;
@@ -22,4 +23,14 @@ CREATE TABLE user_role
     role    VARCHAR NOT NULL,
     CONSTRAINT user_roles_idx UNIQUE (user_id, role),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE meals
+(
+    user_id          INTEGER                           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    id               SERIAL PRIMARY KEY,
+    dateTime         TIMESTAMP                         NOT NULL,
+    description      VARCHAR                           NOT NULL,
+    calories         INTEGER             DEFAULT 2000  NOT NULL,
+    CONSTRAINT meals_user_id_dateTime_idx UNIQUE (user_id, dateTime)
 );
