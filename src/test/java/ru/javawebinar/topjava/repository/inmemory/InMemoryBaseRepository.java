@@ -11,7 +11,7 @@ import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
 
 public class InMemoryBaseRepository<T extends AbstractBaseEntity> {
 
-    static final AtomicInteger counter = new AtomicInteger(START_SEQ);
+    static final AtomicInteger counter = new AtomicInteger(START_SEQ + 2);
 
     final Map<Integer, T> map = new ConcurrentHashMap<>();
 
@@ -38,5 +38,9 @@ public class InMemoryBaseRepository<T extends AbstractBaseEntity> {
 
     void put(T entity) {
         map.put(entity.getId(), entity);
+    }
+
+    public void clear() {
+        map.clear();
     }
 }
