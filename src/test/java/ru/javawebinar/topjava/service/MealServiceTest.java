@@ -22,8 +22,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.assertThrows;
-import static ru.javawebinar.topjava.MealTestData.*;
+import static ru.javawebinar.topjava.MealTestData.assertMatch;
 import static ru.javawebinar.topjava.MealTestData.getUpdated;
+import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.*;
 
 @ContextConfiguration({
@@ -43,12 +44,12 @@ public class MealServiceTest {
 
     @Test
     public void getForUser() {
-        testGet(MEAL_1_USER, USER_ID);
+        testGet(meal_1_user, USER_ID);
     }
 
     @Test
     public void getForAdmin() {
-        testGet(MEAL_8_ADMIN, ADMIN_ID);
+        testGet(meal_8_admin, ADMIN_ID);
     }
 
     private void testGet(Meal meal, int userId) {
@@ -58,22 +59,22 @@ public class MealServiceTest {
 
     @Test
     public void getForUserNotFound() {
-        assertThrows(NotFoundException.class, () -> service.get(MEAL_8_ADMIN.getId(), USER_ID));
+        assertThrows(NotFoundException.class, () -> service.get(meal_8_admin.getId(), USER_ID));
     }
 
     @Test
     public void getForAdminNotFound() {
-        assertThrows(NotFoundException.class, () -> service.get(MEAL_1_USER.getId(), ADMIN_ID));
+        assertThrows(NotFoundException.class, () -> service.get(meal_1_user.getId(), ADMIN_ID));
     }
 
     @Test
     public void deleteForUser() {
-        testDelete(MEAL_1_USER.getId(), USER_ID);
+        testDelete(meal_1_user.getId(), USER_ID);
     }
 
     @Test
     public void deleteForAdmin() {
-        testDelete(MEAL_8_ADMIN.getId(), ADMIN_ID);
+        testDelete(meal_8_admin.getId(), ADMIN_ID);
     }
 
     private void testDelete(int id, int userId) {
@@ -83,18 +84,18 @@ public class MealServiceTest {
 
     @Test
     public void deleteForUserNotFound() {
-        assertThrows(NotFoundException.class, () -> service.delete(MEAL_8_ADMIN.getId(), USER_ID));
+        assertThrows(NotFoundException.class, () -> service.delete(meal_8_admin.getId(), USER_ID));
     }
 
     @Test
     public void deleteForAdminNotFound() {
-        assertThrows(NotFoundException.class, () -> service.delete(MEAL_1_USER.getId(), ADMIN_ID));
+        assertThrows(NotFoundException.class, () -> service.delete(meal_1_user.getId(), ADMIN_ID));
     }
 
     @Test
     public void getBetweenInclusive_30_01_2020_ForUser() {
         testGetBetweenInclusive(
-                Arrays.asList(MEAL_1_USER, MEAL_2_USER, MEAL_3_USER),
+                Arrays.asList(meal_1_user, meal_2_user, meal_3_user),
                 LocalDate.of(2020, Month.JANUARY, 30),
                 LocalDate.of(2020, Month.JANUARY, 30),
                 USER_ID
@@ -155,12 +156,12 @@ public class MealServiceTest {
 
     @Test
     public void updateForUser() {
-        testUpdate(MEAL_1_USER, USER_ID);
+        testUpdate(meal_1_user, USER_ID);
     }
 
     @Test
     public void updateForAdmin() {
-        testUpdate(MEAL_8_ADMIN, ADMIN_ID);
+        testUpdate(meal_8_admin, ADMIN_ID);
     }
 
     private void testUpdate(Meal meal, int userId) {
@@ -171,12 +172,12 @@ public class MealServiceTest {
 
     @Test
     public void updateForUserNotFound() {
-        testUpdateNotFound(MEAL_8_ADMIN, USER_ID);
+        testUpdateNotFound(meal_8_admin, USER_ID);
     }
 
     @Test
     public void updateForAdminNotFound() {
-        testUpdateNotFound(MEAL_1_USER, ADMIN_ID);
+        testUpdateNotFound(meal_1_user, ADMIN_ID);
     }
 
     private void testUpdateNotFound(Meal meal, int userId) {
@@ -185,12 +186,12 @@ public class MealServiceTest {
 
     @Test
     public void updateForUserDuplicateDateTime() {
-        testUpdateDuplicateDateTime(MEAL_1_USER, MEAL_2_USER.getDateTime(), USER_ID);
+        testUpdateDuplicateDateTime(meal_1_user, meal_2_user.getDateTime(), USER_ID);
     }
 
     @Test
     public void updateForAdminDuplicateDateTime() {
-        testUpdateDuplicateDateTime(MEAL_8_ADMIN, MEAL_10_ADMIN.getDateTime(), ADMIN_ID);
+        testUpdateDuplicateDateTime(meal_8_admin, meal_10_admin.getDateTime(), ADMIN_ID);
     }
 
     private void testUpdateDuplicateDateTime(Meal meal, LocalDateTime dateTime, int userId) {
@@ -224,12 +225,12 @@ public class MealServiceTest {
 
     @Test
     public void createForUserDuplicateDateTime() {
-        testCreateDuplicateDateTime(MEAL_1_USER.getDateTime(), USER_ID);
+        testCreateDuplicateDateTime(meal_1_user.getDateTime(), USER_ID);
     }
 
     @Test
     public void createForAdminDuplicateDateTime() {
-        testCreateDuplicateDateTime(MEAL_13_ADMIN.getDateTime(), ADMIN_ID);
+        testCreateDuplicateDateTime(meal_13_admin.getDateTime(), ADMIN_ID);
     }
 
     private void testCreateDuplicateDateTime(LocalDateTime dateTime, int userId) {

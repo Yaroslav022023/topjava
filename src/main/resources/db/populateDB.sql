@@ -12,7 +12,7 @@ INSERT INTO user_role (role, user_id)
 VALUES ('USER', 100000),
        ('ADMIN', 100001);
 
-INSERT INTO meals (id, dateTime, description, calories, user_id)
+INSERT INTO meals (id, date_time, description, calories, user_id)
 VALUES (100003, '2020-01-30 10:00', 'breakfast - user', 500, 100000),
        (100004, '2020-01-30 13:00', 'lunch - user', 1000, 100000),
        (100005, '2020-01-30 20:00', 'dinner - user', 500, 100000),
@@ -26,3 +26,5 @@ VALUES (100003, '2020-01-30 10:00', 'breakfast - user', 500, 100000),
        (100013, '2021-03-04 10:00', 'breakfast - admin', 300, 100001),
        (100014, '2021-03-04 13:00', 'lunch - admin', 1000, 100001),
        (100015, '2021-03-04 20:00', 'dinner - admin', 500, 100001);
+
+SELECT setval('global_seq', (SELECT MAX(id) FROM meals) + 1);
