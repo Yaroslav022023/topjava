@@ -6,8 +6,8 @@
 /log/
 /.PVS-Studio/
 *.class
-*.patch
 *.codacy.yml
+*.patch
 
 #Intellij IDEA
 /.idea/
