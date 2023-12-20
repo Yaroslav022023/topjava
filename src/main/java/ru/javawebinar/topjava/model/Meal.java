@@ -21,7 +21,9 @@ import java.time.LocalTime;
                 "WHERE m.id = :id AND m.user.id = :userId")
 })
 @Entity
-@Table(name = "meal")
+@Table(name = "meal", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "date_time"}, name = "meal_unique_user_datetime_idx")
+})
 public class Meal extends AbstractBaseEntity {
 
     public static final String DELETE = "Meal.delete";
@@ -45,7 +47,7 @@ public class Meal extends AbstractBaseEntity {
     private int calories;
 
     @ManyToOne()
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Meal() {
