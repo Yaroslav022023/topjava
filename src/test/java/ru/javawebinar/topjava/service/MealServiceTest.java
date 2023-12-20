@@ -7,13 +7,14 @@ import org.junit.rules.ExternalResource;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -22,7 +23,7 @@ import java.time.Month;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -36,8 +37,8 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
-    private static final Logger logger = Logger.getLogger("MealServiceTest");
-    private static final Map<String, Long> testTimes = new ConcurrentHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+    private static final Map<String, Long> summaryLog = new ConcurrentHashMap<>();
 
     @Autowired
     private MealService service;
@@ -47,20 +48,22 @@ public class MealServiceTest {
         @Override
         protected void finished(long nanos, Description description) {
             long time = TimeUnit.NANOSECONDS.toMillis(nanos);
-            testTimes.put(description.getMethodName(), time);
-            String message = String.format("Test %s finished, spent %d milliseconds",
+            summaryLog.put(description.getMethodName(), time);
+            String message = String.format("Test: %s finished, spent %d milliseconds",
                     description.getMethodName(), time);
-            logger.info(message);
+            log.debug(message);
         }
     };
 
     @ClassRule
-    public static ExternalResource summaryLogger = new ExternalResource() {
+    public static ExternalResource executionSummaryLog = new ExternalResource() {
         @Override
         protected void after() {
-            testTimes.forEach((test, time) ->
-                    logger.info(test + " - " + time + " milliseconds")
-            );
+            String summary = "All tests finished: " +
+                    summaryLog.entrySet().stream()
+                            .map(entry -> entry.getKey() + " - " + entry.getValue() + "ms")
+                            .collect(Collectors.joining(", "));
+            log.debug(summary);
         }
     };
 
@@ -115,7 +118,6 @@ public class MealServiceTest {
     @Test
     public void updateUserMeal() {
         Meal updated = getUpdated();
-        updated.setUser(UserTestData.user);
         service.update(updated, USER_ID);
         MEAL_MATCHER.assertMatch(service.get(MEAL1_ID, USER_ID), getUpdated());
     }
