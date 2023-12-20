@@ -51,7 +51,7 @@ public class MealServiceTest {
             summaryLog.put(description.getMethodName(), time);
             String message = String.format("Test: %s finished, spent %d milliseconds",
                     description.getMethodName(), time);
-            log.debug(message);
+            log.info(message);
         }
     };
 
@@ -59,11 +59,22 @@ public class MealServiceTest {
     public static ExternalResource executionSummaryLog = new ExternalResource() {
         @Override
         protected void after() {
-            String summary = "All tests finished: " +
+            int maxKeyLength = summaryLog.keySet().stream()
+                    .mapToInt(String::length)
+                    .max()
+                    .orElse(0);
+            int maxValueLength = summaryLog.values().stream()
+                    .mapToInt(Number::intValue)
+                    .mapToObj(String::valueOf)
+                    .mapToInt(String::length)
+                    .max()
+                    .orElse(0);
+            String summary = "All tests finished:\n" +
                     summaryLog.entrySet().stream()
-                            .map(entry -> entry.getKey() + " - " + entry.getValue() + "ms")
-                            .collect(Collectors.joining(", "));
-            log.debug(summary);
+                            .map(entry -> String.format("%" + maxKeyLength + "s - %" + maxValueLength + "d ms",
+                                    entry.getKey(), entry.getValue()))
+                            .collect(Collectors.joining("\n"));
+            log.info(summary);
         }
     };
 
