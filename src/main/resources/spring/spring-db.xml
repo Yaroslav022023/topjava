@@ -9,9 +9,9 @@
        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-<!-- Change DB by comment/uncomment property-placeholder -->
+    <!-- Change DB by comment/uncomment property-placeholder -->
 
-<!--    <context:property-placeholder location="classpath:db/postgres.properties" system-properties-mode="OVERRIDE"/>-->
+    <!--    <context:property-placeholder location="classpath:db/postgres.properties" system-properties-mode="OVERRIDE"/>-->
     <context:property-placeholder location="classpath:db/hsqldb.properties" system-properties-mode="OVERRIDE"/>
 
     <!--
@@ -47,7 +47,8 @@
         <property name="jpaPropertyMap">
             <map>
                 <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
-                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="${hibernate.use_sql_comments}"/>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}"
+                       value="${hibernate.use_sql_comments}"/>
                 <!--<entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_AUTO}" value="${hibernate.hbm2ddl.auto}"/>-->
             </map>
         </property>
