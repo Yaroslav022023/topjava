@@ -23,6 +23,6 @@ public interface MealRepository {
 
     // get meal with user
     default Meal getWithUser(int id, int userId) {
-        return null;
+        throw new UnsupportedOperationException("Unsupported operation");
     }
 }

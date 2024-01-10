@@ -7,8 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.User;
 
-import java.util.Optional;
-
 @Transactional(readOnly = true)
 public interface CrudUserRepository extends JpaRepository<User, Integer> {
     @Transactional
@@ -20,5 +18,5 @@ public interface CrudUserRepository extends JpaRepository<User, Integer> {
     User findByEmail(String email);
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.meals m WHERE u.id = :id ORDER BY m.dateTime DESC")
-    Optional<User> findByIdWithMeals(@Param("id") int id);
+    User findByIdWithMeals(@Param("id") int id);
 }

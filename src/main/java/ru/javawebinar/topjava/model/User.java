@@ -55,7 +55,7 @@ public class User extends AbstractNamedEntity {
     private int caloriesPerDay = DEFAULT_CALORIES_PER_DAY;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private final List<Meal> meals = new ArrayList<>();
+    private List<Meal> meals;
 
     public User() {
     }

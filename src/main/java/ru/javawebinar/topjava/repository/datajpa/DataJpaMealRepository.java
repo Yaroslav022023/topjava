@@ -1,7 +1,7 @@
 package ru.javawebinar.topjava.repository.datajpa;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
@@ -13,19 +13,19 @@ public class DataJpaMealRepository implements MealRepository {
     private final CrudMealRepository crudRepository;
     private final CrudUserRepository crudUserRepository;
 
-    @Autowired
     public DataJpaMealRepository(CrudMealRepository crudRepository, CrudUserRepository crudUserRepository) {
         this.crudRepository = crudRepository;
         this.crudUserRepository = crudUserRepository;
     }
 
     @Override
+    @Transactional
     public Meal save(Meal meal, int userId) {
         meal.setUser(crudUserRepository.getReferenceById(userId));
-        if (!meal.isNew()) {
-            return get(meal.id(), userId) == null ? null : crudRepository.save(meal);
+        if (meal.isNew() || get(meal.id(), userId) != null) {
+            return crudRepository.save(meal);
         }
-        return crudRepository.save(meal);
+        return null;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class DataJpaMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        return crudRepository.findByIdAndUserId(id, userId).orElse(null);
+        return crudRepository.findByIdAndUserId(id, userId);
     }
 
     @Override
@@ -49,6 +49,6 @@ public class DataJpaMealRepository implements MealRepository {
     }
 
     public Meal getWithUser(int id, int userId) {
-        return crudRepository.findByIdAndUserIdWithUser(id, userId).orElse(null);
+        return crudRepository.findByIdAndUserIdWithUser(id, userId);
     }
 }
