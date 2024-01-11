@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.service.meal;
+package ru.javawebinar.topjava.service;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,11 +17,9 @@ import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
-public abstract class AbstractMealServiceTest extends AbstractServiceTest<MealService> {
+public abstract class AbstractMealServiceTest extends AbstractServiceTest {
     @Autowired
-    protected void setService(MealService service) {
-        this.service = service;
-    }
+    protected MealService service;
 
     @Test
     public void delete() {
