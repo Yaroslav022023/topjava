@@ -5,25 +5,15 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
-<head>
-    <title>Meal</title>
-</head>
-<jsp:include page="fragments/headTag.jsp"/>
+<jsp:include page="fragments/mealHeader.jsp"/>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
     <h2>
-        <c:choose>
-            <c:when test="${fn:contains(requestScope['javax.servlet.forward.request_uri'], '/meals/create')}">
-                <spring:message code="meal.add"/>
-            </c:when>
-            <c:otherwise>
-                <spring:message code="meal.edit"/>
-            </c:otherwise>
-        </c:choose>
+        <spring:message code="${meal.id == null ? 'meal.add' : 'meal.edit'}"/>
     </h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
-    <form method="post" action="${pageContext.request.contextPath}/meals">
+    <form method="post" action="meals">
         <input type="hidden" name="id" value="${meal.id}">
         <dl>
             <dt><spring:message code="meal.dateTime"/>:</dt>

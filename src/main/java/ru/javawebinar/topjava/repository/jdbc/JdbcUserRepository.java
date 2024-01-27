@@ -16,40 +16,31 @@ import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 @Repository
 @Transactional(readOnly = true)
-public class JdbcUserRepository implements UserRepository {
+public class JdbcUserRepository extends AbstractJdbcRepository<User> implements UserRepository {
+    private static final UserWithRolesExtractor USER_WITH_ROLES_EXTRACTOR = new UserWithRolesExtractor();
+    private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final SimpleJdbcInsert insertUser;
-    private final Validator validator;
 
-    public JdbcUserRepository(JdbcTemplate jdbcTemplate,
-                              NamedParameterJdbcTemplate namedParameterJdbcTemplate, Validator validator) {
+    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
-
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.validator = validator;
     }
 
     @Override
     @Transactional
     public User save(User user) {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-
+        validate(user);
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
@@ -107,7 +98,7 @@ public class JdbcUserRepository implements UserRepository {
     public User get(int id) {
         List<User> users = jdbcTemplate.query(
                 "SELECT u.*, r.role FROM users u LEFT JOIN user_role r ON u.id = r.user_id WHERE u.id=?",
-                new UserWithRolesExtractor(), id);
+                USER_WITH_ROLES_EXTRACTOR, id);
         return DataAccessUtils.singleResult(users);
     }
 
@@ -115,40 +106,35 @@ public class JdbcUserRepository implements UserRepository {
     public User getByEmail(String email) {
         List<User> users = jdbcTemplate.query(
                 "SELECT u.*, r.role FROM users u LEFT JOIN user_role r ON u.id = r.user_id WHERE u.email=?",
-                new UserWithRolesExtractor(), email);
+                USER_WITH_ROLES_EXTRACTOR, email);
         return DataAccessUtils.singleResult(users);
     }
 
     @Override
     public List<User> getAll() {
         return jdbcTemplate.query(
-                "SELECT u.*, r.role FROM users u LEFT JOIN user_role r ON u.id = r.user_id ORDER BY u.name, u.email",
-                new UserWithRolesExtractor());
+                "SELECT u.*, r.role FROM users u " +
+                        "LEFT JOIN user_role r ON u.id = r.user_id ORDER BY u.name, u.email",
+                USER_WITH_ROLES_EXTRACTOR);
     }
 
     private static class UserWithRolesExtractor implements ResultSetExtractor<List<User>> {
         @Override
         public List<User> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
             final Map<Integer, User> userMap = new LinkedHashMap<>();
-
             while (rs.next()) {
                 int userId = rs.getInt("id");
                 User user = userMap.get(userId);
-
                 if (user == null) {
                     user = ROW_MAPPER.mapRow(rs, 0);
-                    assert user != null;
-                    user.setRoles(new HashSet<>());
+                    user.setRoles(EnumSet.noneOf(Role.class));
                     userMap.put(userId, user);
                 }
-
                 String roleStr = rs.getString("role");
                 if (roleStr != null) {
                     user.getRoles().add(Role.valueOf(roleStr));
                 }
             }
-
             return new ArrayList<>(userMap.values());
         }
     }
