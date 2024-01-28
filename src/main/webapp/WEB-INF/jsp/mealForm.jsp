@@ -5,12 +5,12 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
-<jsp:include page="fragments/mealHeader.jsp"/>
+<jsp:include page="fragments/headTag.jsp"/>
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
     <h2>
-        <spring:message code="${meal.id == null ? 'meal.add' : 'meal.edit'}"/>
+        <spring:message code="${meal.isNew() ? 'meal.add' : 'meal.edit'}"/>
     </h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="meals">

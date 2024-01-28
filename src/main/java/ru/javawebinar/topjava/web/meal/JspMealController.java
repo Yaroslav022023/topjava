@@ -5,8 +5,6 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
@@ -17,34 +15,29 @@ import java.time.temporal.ChronoUnit;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
-import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
-import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
 @RequestMapping("/meals")
 public class JspMealController extends AbstractMealController {
 
     @GetMapping()
-    public String getAll(Model model) {
-        final int userId = SecurityUtil.authUserId();
+    public String doGetAll(Model model) {
+        model.addAttribute("meals", getAll());
         log.info("getAll for user {}", userId);
-        model.addAttribute("meals", MealsUtil.getTos(service.getAll(userId), SecurityUtil.authUserCaloriesPerDay()));
         return "meals";
     }
 
     @GetMapping("/create")
-    public String create(Model model) {
-        final int userId = SecurityUtil.authUserId();
-        log.info("create for user {}", userId);
+    public String doCreate(Model model) {
         model.addAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
+        log.info("creating for user {}...", userId);
         return "mealForm";
     }
 
     @GetMapping("/update/{id}")
-    public String update(Model model, @PathVariable("id") int id) {
-        final int userId = SecurityUtil.authUserId();
-        log.info("update {} for user {}", id, userId);
-        model.addAttribute("meal", service.get(id, userId));
+    public String doUpdate(Model model, @PathVariable("id") int id) {
+        model.addAttribute("meal", get(id));
+        log.info("updating {} for user {}...", id, userId);
         return "mealForm";
     }
 
@@ -54,30 +47,26 @@ public class JspMealController extends AbstractMealController {
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
-        final int userId = SecurityUtil.authUserId();
 
         if (StringUtils.hasLength(request.getParameter("id"))) {
-            assureIdConsistent(meal, Integer.parseInt(request.getParameter("id")));
-            log.info("update {} for user {}", meal, userId);
-            service.update(meal, userId);
+            update(meal, Integer.parseInt(request.getParameter("id")));
+            log.info("updated {} for user {}", meal, userId);
         } else {
-            checkNew(meal);
-            log.info("create {} for user {}", meal, userId);
-            service.create(meal, userId);
+            create(meal);
+            log.info("created {} for user {}", meal, userId);
         }
         return "redirect:/meals";
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id) {
-        final int userId = SecurityUtil.authUserId();
-        log.info("delete meal {} for user {}", id, userId);
-        service.delete(id, userId);
+    public String doDelete(@PathVariable("id") int id) {
+        delete(id);
+        log.info("deleted meal {} for user {}", id, userId);
         return "redirect:/meals";
     }
 
     @GetMapping("/filter")
-    public String filter(
+    public String doGetFiltered(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String startTime,
@@ -89,13 +78,9 @@ public class JspMealController extends AbstractMealController {
         LocalTime startLocalTime = parseLocalTime(startTime);
         LocalTime endLocalTime = parseLocalTime(endTime);
 
-        final int userId = SecurityUtil.authUserId();
+        model.addAttribute("meals", getFiltered(startLocalDate, endLocalDate, startLocalTime, endLocalTime));
         log.info("getBetween dates({} - {}) time({} - {}) for user {}",
                 startLocalDate, endLocalDate, startLocalTime, endLocalTime, userId);
-
-        model.addAttribute("meals", MealsUtil.getFilteredTos(
-                service.getBetweenInclusive(startLocalDate, endLocalDate, userId),
-                SecurityUtil.authUserCaloriesPerDay(), startLocalTime, endLocalTime));
         return "meals";
     }
 }
