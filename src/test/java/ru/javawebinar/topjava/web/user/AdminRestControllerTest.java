@@ -11,14 +11,17 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.javawebinar.topjava.MealTestData.adminMeals;
+import static ru.javawebinar.topjava.MealTestData.meals;
 import static ru.javawebinar.topjava.UserTestData.*;
 
 class AdminRestControllerTest extends AbstractControllerTest {
-
     private static final String REST_URL = AdminRestController.REST_URL + '/';
 
     @Autowired
@@ -82,5 +85,38 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(USER_MATCHER.contentJson(admin, guest, user));
+    }
+
+    @Test
+    void getAllWithMeals_User() throws Exception {
+        final User expected = new User(user);
+        expected.setMeals(meals);
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + USER_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
+    }
+
+    @Test
+    void getAllWithMeals_Admin() throws Exception {
+        final User expected = new User(admin);
+        expected.setMeals(adminMeals);
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + ADMIN_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
+    }
+
+    @Test
+    void getAllWithMeals_Guest() throws Exception {
+        final User expected = new User(guest);
+        expected.setMeals(new ArrayList<>());
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + GUEST_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
     }
 }
