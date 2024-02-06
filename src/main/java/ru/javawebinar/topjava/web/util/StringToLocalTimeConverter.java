@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-@Component("stringToLocalTimeConverter")
+@Component()
 public class StringToLocalTimeConverter implements Converter<String, LocalTime> {
     private static final String TIME_PATTERN = "HH:mm";
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME_PATTERN);
