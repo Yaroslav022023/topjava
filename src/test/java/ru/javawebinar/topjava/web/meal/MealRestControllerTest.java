@@ -85,9 +85,10 @@ public class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
-        //getBetween() 30-01-2020 - 30-01-2020. Should return: meal3, meal2, meal1.
-    void getBetween_Date() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL + "filter?startDate=" + meal1.getDate() + "&endDate=" + meal3.getDate()))
+    void getBetweenDate() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "filter")
+                .param("startDate", "2020-01-30")
+                .param("endDate", "2020-01-30"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_DTO_MATCHER.contentJson(
@@ -95,47 +96,56 @@ public class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
-        //getBetween() 10:00 - 13:00. Should return: meal5, meal1.
     void getBetween_Time() throws Exception {
         List<MealTo> expected = MealsUtil.getFilteredTos(
                 meals, authUserCaloriesPerDay(), meal1.getTime(), meal2.getTime());
-        perform(MockMvcRequestBuilders.get(REST_URL + "filter?startTime=" + meal1.getTime() + "&endTime=" + meal2.getTime()))
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "filter")
+                .param("startTime", "10:00")
+                .param("endTime", "13:00"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_DTO_MATCHER.contentJson(expected));
     }
 
     @Test
-        //getBetween() 31-01-2020 - 31-01-2020 20:00. Should return: meal6, meal5, meal4.
     void getBetween_DateAndTime() throws Exception {
         List<MealTo> expected = MealsUtil.getFilteredTos(
                 List.of(meal7, meal6, meal5, meal4), authUserCaloriesPerDay(), null, meal7.getTime());
-        perform(MockMvcRequestBuilders.get(REST_URL + "filter?startDate=" + meal4.getDate()
-                + "&endDate=" + meal4.getDate() + "&endTime=" + meal3.getTime()))
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "filter")
+                .param("startDate", "2020-01-31")
+                .param("endDate", "2020-01-31")
+                .param("endTime", "20:00"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_DTO_MATCHER.contentJson(expected));
     }
 
     @Test
-        //getBetween() 30-01-2020 13:00 - 31-01-2020. Should return: meal7, meal6, meal3, meal2.
     void getBetween_DateAndTime2() throws Exception {
         List<MealTo> expected = MealsUtil.getFilteredTos(
                 meals, authUserCaloriesPerDay(), meal2.getTime(), null);
-        perform(MockMvcRequestBuilders.get(REST_URL + "filter?startDate=" + meal1.getDate()
-                + "&endDate=" + meal4.getDate() + "&startTime=" + meal2.getTime()))
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "filter")
+                .param("startDate", "2020-01-30")
+                .param("startTime", "13:00")
+                .param("endDate", "2020-01-31"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_DTO_MATCHER.contentJson(expected));
     }
 
     @Test
-        //getBetween() 30-01-2020 13:00 - 31-01-2020 20:00. Should return: meal6, meal2.
     void getBetween_DateAndTime3() throws Exception {
         List<MealTo> expected = MealsUtil.getFilteredTos(
                 meals, authUserCaloriesPerDay(), meal2.getTime(), meal3.getTime());
-        perform(MockMvcRequestBuilders.get(REST_URL + "filter?startDate=" + meal1.getDate()
-                + "&endDate=" + meal4.getDate() + "&startTime=" + meal2.getTime() + "&endTime=" + meal3.getTime()))
+
+        perform(MockMvcRequestBuilders.get(REST_URL + "filter")
+                .param("startDate", "2020-01-30")
+                .param("startTime", "13:00")
+                .param("endDate", "2020-01-31")
+                .param("endTime", "20:00"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MEAL_DTO_MATCHER.contentJson(expected));

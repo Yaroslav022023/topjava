@@ -92,7 +92,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         final User expected = new User(user);
         expected.setMeals(meals);
 
-        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + USER_ID))
+        perform(MockMvcRequestBuilders.get(REST_URL + USER_ID + "/with-meals"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
@@ -103,7 +103,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         final User expected = new User(admin);
         expected.setMeals(adminMeals);
 
-        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + ADMIN_ID))
+        perform(MockMvcRequestBuilders.get(REST_URL + ADMIN_ID + "/with-meals"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
@@ -114,7 +114,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
         final User expected = new User(guest);
         expected.setMeals(new ArrayList<>());
 
-        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + GUEST_ID))
+        perform(MockMvcRequestBuilders.get(REST_URL + GUEST_ID + "/with-meals"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(USER_MATCHER_WITH_MEALS.contentJson(expected));
