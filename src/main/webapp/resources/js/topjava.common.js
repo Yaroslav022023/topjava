@@ -50,6 +50,50 @@ function save() {
     });
 }
 
+function doFilter() {
+    $(".filterForm").submit(function (event) {
+        event.preventDefault();
+        var queryString = $.param({
+            startDate: $(this).find("input[name='startDate']").val(),
+            startTime: $(this).find("input[name='startTime']").val(),
+            endDate: $(this).find("input[name='endDate']").val(),
+            endTime: $(this).find("input[name='endTime']").val()
+        });
+        $.ajax({
+            type: 'GET',
+            url: ctx.ajaxUrl + 'filter?' + queryString,
+            dataType: 'json'
+        }).done(function (data) {
+            ctx.datatableApi.clear().rows.add(data).draw();
+            successNoty("Filtered");
+        })
+    });
+}
+
+function activate(checkboxElem, id) {
+    var isEnabled = checkboxElem.checked;
+    var row = $(checkboxElem).closest('tr');
+
+    $.ajax({
+        url: ctx.ajaxUrl + id + '/enable',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({enabled: isEnabled}),
+        success: function () {
+            console.log('User status updated successfully');
+            if (isEnabled) {
+                row.removeClass('inactive-user');
+            } else {
+                row.addClass('inactive-user');
+            }
+        },
+        error: function (error) {
+            console.error('Error updating user status:', error);
+            checkboxElem.checked = !isEnabled;
+        }
+    });
+}
+
 let failedNote;
 
 function closeNoty() {

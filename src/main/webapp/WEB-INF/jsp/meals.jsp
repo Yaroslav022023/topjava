@@ -3,12 +3,14 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fn" uri="http://topjava.javawebinar.ru/functions" %>
 <html>
-<jsp:include page="mealForm.jsp"/>
+<jsp:include page="fragments/headTag.jsp"/>
 <body>
+<script src="resources/js/topjava.meals.js" defer></script>
+<jsp:include page="mealForm.jsp"/>
+<jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
     <h3><spring:message code="meal.title"/></h3>
-
-    <form method="get" action="meals/filter">
+    <form class="filterForm">
         <dl>
             <dt><spring:message code="meal.startDate"/>:</dt>
             <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
@@ -25,8 +27,16 @@
             <dt><spring:message code="meal.endTime"/>:</dt>
             <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
         </dl>
-        <button type="submit"><spring:message code="meal.filter"/></button>
+        <button class="btn btn-primary" onclick="doFilter()">
+            <span class="fa fa-plus"></span>
+            <spring:message code="meal.filter"/>
+        </button>
+        <button class="btn btn-danger" onclick="clearFilter()">
+            <span class="fa fa-remove"></span>
+            <spring:message code="common.cancel"/>
+        </button>
     </form>
+
     <div class="jumbotron pt-4">
         <div class="container">
             <h3 class="text-center"><spring:message code="meal.title"/></h3>

@@ -1,8 +1,8 @@
-const userAjaxUrl = "api/meals/";
+const mealAjaxUrl = "api/meals/";
 
 // https://stackoverflow.com/a/5064235/548473
 const ctx = {
-    ajaxUrl: userAjaxUrl
+    ajaxUrl: mealAjaxUrl
 };
 
 // $(document).ready(function () {
@@ -39,3 +39,8 @@ $(function () {
         })
     );
 });
+
+function clearFilter() {
+    $(".filterForm")[0].reset();
+    updateTable();
+}

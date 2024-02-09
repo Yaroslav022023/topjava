@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -7,6 +8,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
+import ru.javawebinar.topjava.to.UserEnabledTo;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
@@ -92,5 +94,23 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(USER_WITH_MEALS_MATCHER.contentJson(admin));
+    }
+
+    @Test
+    void enable() throws Exception {
+        boolean enabled = false;
+        UserEnabledTo uet = new UserEnabledTo();
+        uet.setEnabled(enabled);
+
+        User expected = new User(user);
+        expected.setEnabled(enabled);
+
+        perform(MockMvcRequestBuilders.put(REST_URL + USER_ID + "/enable")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(uet)))
+                .andExpect(status().isNoContent());
+
+        Assertions.assertEquals(enabled, userService.get(USER_ID).isEnabled());
+        USER_MATCHER.assertMatch(userService.get(USER_ID), expected);
     }
 }
