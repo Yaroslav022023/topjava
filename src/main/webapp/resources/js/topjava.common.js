@@ -33,8 +33,9 @@ function deleteRow(id) {
 }
 
 function updateTable() {
-    $.get(ctx.ajaxUrl, function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw();
+    var queryString = $.isEmptyObject(currentFilterParams) ? '' : 'filter?' + $.param(currentFilterParams);
+    $.get(ctx.ajaxUrl + queryString, function (data) {
+        ctx.datatableApi.clear().rows.add(data).draw(false);
     });
 }
 
@@ -50,15 +51,18 @@ function save() {
     });
 }
 
+var currentFilterParams = {};
+
 function doFilter() {
     $(".filterForm").submit(function (event) {
         event.preventDefault();
-        var queryString = $.param({
+        currentFilterParams = {
             startDate: $(this).find("input[name='startDate']").val(),
             startTime: $(this).find("input[name='startTime']").val(),
             endDate: $(this).find("input[name='endDate']").val(),
             endTime: $(this).find("input[name='endTime']").val()
-        });
+        };
+        var queryString = $.param(currentFilterParams);
         $.ajax({
             type: 'GET',
             url: ctx.ajaxUrl + 'filter?' + queryString,

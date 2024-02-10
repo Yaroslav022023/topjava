@@ -42,5 +42,5 @@ $(function () {
 
 function clearFilter() {
     $(".filterForm")[0].reset();
-    updateTable();
+    currentFilterParams = {};
 }
