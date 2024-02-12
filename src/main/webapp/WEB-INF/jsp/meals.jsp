@@ -6,6 +6,7 @@
 <jsp:include page="fragments/headTag.jsp"/>
 <body>
 <script src="resources/js/topjava.meals.js" defer></script>
+<script src="resources/js/topjava.common.js" defer></script>
 <jsp:include page="mealForm.jsp"/>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
@@ -27,11 +28,11 @@
             <dt><spring:message code="meal.endTime"/>:</dt>
             <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
         </dl>
-        <button class="btn btn-primary" onclick="doFilter()">
-            <span class="fa fa-plus"></span>
+        <button type="submit" class="btn btn-primary">
+            <span class="fa fa-filter"></span>
             <spring:message code="meal.filter"/>
         </button>
-        <button class="btn btn-danger" onclick="clearFilter()">
+        <button type="button" class="btn btn-danger" onclick="clearFilter()">
             <span class="fa fa-remove"></span>
             <spring:message code="common.cancel"/>
         </button>
@@ -40,7 +41,7 @@
     <div class="jumbotron pt-4">
         <div class="container">
             <h3 class="text-center"><spring:message code="meal.title"/></h3>
-            <button class="btn btn-primary" onclick="add()">
+            <button type="button" class="btn btn-primary" onclick="add()">
                 <span class="fa fa-plus"></span>
                 <spring:message code="meal.add"/>
             </button>

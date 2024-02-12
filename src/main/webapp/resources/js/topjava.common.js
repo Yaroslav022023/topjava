@@ -27,14 +27,17 @@ function deleteRow(id) {
         url: ctx.ajaxUrl + id,
         type: "DELETE"
     }).done(function () {
-        updateTable();
+        if (ctx.ajaxUrl === "api/meals/") {
+            updateTableIncludingFilters();
+        } else {
+            updateTable();
+        }
         successNoty("Deleted");
     });
 }
 
 function updateTable() {
-    var queryString = $.isEmptyObject(currentFilterParams) ? '' : 'filter?' + $.param(currentFilterParams);
-    $.get(ctx.ajaxUrl + queryString, function (data) {
+    $.get(ctx.ajaxUrl, function (data) {
         ctx.datatableApi.clear().rows.add(data).draw(false);
     });
 }
@@ -46,55 +49,12 @@ function save() {
         data: form.serialize()
     }).done(function () {
         $("#editRow").modal("hide");
-        updateTable();
-        successNoty("Saved");
-    });
-}
-
-var currentFilterParams = {};
-
-function doFilter() {
-    $(".filterForm").submit(function (event) {
-        event.preventDefault();
-        currentFilterParams = {
-            startDate: $(this).find("input[name='startDate']").val(),
-            startTime: $(this).find("input[name='startTime']").val(),
-            endDate: $(this).find("input[name='endDate']").val(),
-            endTime: $(this).find("input[name='endTime']").val()
-        };
-        var queryString = $.param(currentFilterParams);
-        $.ajax({
-            type: 'GET',
-            url: ctx.ajaxUrl + 'filter?' + queryString,
-            dataType: 'json'
-        }).done(function (data) {
-            ctx.datatableApi.clear().rows.add(data).draw();
-            successNoty("Filtered");
-        })
-    });
-}
-
-function activate(checkboxElem, id) {
-    var isEnabled = checkboxElem.checked;
-    var row = $(checkboxElem).closest('tr');
-
-    $.ajax({
-        url: ctx.ajaxUrl + id + '/enable',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify({enabled: isEnabled}),
-        success: function () {
-            console.log('User status updated successfully');
-            if (isEnabled) {
-                row.removeClass('inactive-user');
-            } else {
-                row.addClass('inactive-user');
-            }
-        },
-        error: function (error) {
-            console.error('Error updating user status:', error);
-            checkboxElem.checked = !isEnabled;
+        if (ctx.ajaxUrl === "api/meals/") {
+            updateTableIncludingFilters();
+        } else {
+            updateTable();
         }
+        successNoty("Saved");
     });
 }
 

@@ -40,7 +40,33 @@ $(function () {
     );
 });
 
+var currentFilterParams = {};
+
+$(document).ready(function() {
+    $(".filterForm").off().on('submit', function(event) {
+        event.preventDefault();
+        currentFilterParams = $(this).serialize();
+        $.ajax({
+            type: 'GET',
+            url: ctx.ajaxUrl + 'filter',
+            data: currentFilterParams,
+            dataType: 'json'
+        }).done(function (data) {
+            ctx.datatableApi.clear().rows.add(data).draw();
+            successNoty("Filtered");
+        });
+    });
+});
+
+function updateTableIncludingFilters() {
+    var queryString = $.isEmptyObject(currentFilterParams) ? '' : 'filter?' + currentFilterParams;
+    $.get(ctx.ajaxUrl + queryString, function (data) {
+        ctx.datatableApi.clear().rows.add(data).draw(false);
+    });
+}
+
 function clearFilter() {
     $(".filterForm")[0].reset();
     currentFilterParams = {};
+    updateTable();
 }

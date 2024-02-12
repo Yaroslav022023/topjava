@@ -45,3 +45,24 @@ $(function () {
         })
     );
 });
+
+function activate(checkboxElem, id) {
+    var isEnabled = checkboxElem.checked;
+    var row = $(checkboxElem).closest('tr');
+    $.ajax({
+        url: ctx.ajaxUrl + id + '/enable',
+        type: 'PATCH',
+        contentType: 'application/json',
+        data: JSON.stringify({enabled: isEnabled}),
+        success: function () {
+            if (isEnabled) {
+                row.removeClass('inactive-user');
+            } else {
+                row.addClass('inactive-user');
+            }
+        },
+        error: function () {
+            checkboxElem.checked = !isEnabled;
+        }
+    });
+}
