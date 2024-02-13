@@ -33,36 +33,37 @@ $(function () {
             "order": [
                 [
                     0,
-                    "desk"
+                    "desc"
                 ]
             ]
-        })
+        }), updateTable
     );
 });
 
 var currentFilterParams = {};
 
-$(document).ready(function() {
-    $(".filterForm").off().on('submit', function(event) {
+$(document).ready(function () {
+    $(".filterForm").on('submit', function (event) {
         event.preventDefault();
         currentFilterParams = $(this).serialize();
-        $.ajax({
-            type: 'GET',
-            url: ctx.ajaxUrl + 'filter',
-            data: currentFilterParams,
-            dataType: 'json'
-        }).done(function (data) {
-            ctx.datatableApi.clear().rows.add(data).draw();
-            successNoty("Filtered");
-        });
+        fetchDataAndUpdateTable(currentFilterParams);
     });
 });
 
-function updateTableIncludingFilters() {
+function fetchDataAndUpdateTable(currentFilterParams) {
     var queryString = $.isEmptyObject(currentFilterParams) ? '' : 'filter?' + currentFilterParams;
-    $.get(ctx.ajaxUrl + queryString, function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw(false);
+    $.ajax({
+        type: 'GET',
+        url: ctx.ajaxUrl + queryString,
+        dataType: 'json'
+    }).done(function(data) {
+        ctx.datatableApi.clear().rows.add(data).draw();
+        successNoty("Filtered");
     });
+}
+
+const updateTableIncludingFilters = function () {
+    fetchDataAndUpdateTable(currentFilterParams);
 }
 
 function clearFilter() {

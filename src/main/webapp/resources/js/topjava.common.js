@@ -1,11 +1,11 @@
 let form;
 
-function makeEditable(datatableApi) {
+function makeEditable(datatableApi, callback) {
     ctx.datatableApi = datatableApi;
     form = $('#detailsForm');
     $(".delete").click(function () {
         if (confirm('Are you sure?')) {
-            deleteRow($(this).closest('tr').attr("id"));
+            deleteRow($(this).closest('tr').attr("id"), callback);
         }
     });
 
@@ -22,15 +22,13 @@ function add() {
     $("#editRow").modal();
 }
 
-function deleteRow(id) {
+function deleteRow(id, callback) {
     $.ajax({
         url: ctx.ajaxUrl + id,
         type: "DELETE"
     }).done(function () {
-        if (ctx.ajaxUrl === "api/meals/") {
-            updateTableIncludingFilters();
-        } else {
-            updateTable();
+        if (typeof callback === "function") {
+            callback();
         }
         successNoty("Deleted");
     });
@@ -42,17 +40,15 @@ function updateTable() {
     });
 }
 
-function save() {
+function save(callback) {
     $.ajax({
         type: "POST",
         url: ctx.ajaxUrl,
         data: form.serialize()
     }).done(function () {
         $("#editRow").modal("hide");
-        if (ctx.ajaxUrl === "api/meals/") {
-            updateTableIncludingFilters();
-        } else {
-            updateTable();
+        if (typeof callback === "function") {
+            callback();
         }
         successNoty("Saved");
     });
