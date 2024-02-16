@@ -32,6 +32,14 @@ tr[data-user-enabled="false"] {
     border: 1px solid #9feba6;
 }
 
+.excess {
+    color: red;
+}
+
+.non-excess {
+    color: green;
+}
+
 /*https://getbootstrap.com/docs/4.0/examples/sticky-footer/sticky-footer.css*/
 html {
     position: relative;

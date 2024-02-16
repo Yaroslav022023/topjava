@@ -7,6 +7,7 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UsersUtil;
+import ru.javawebinar.topjava.web.util.ExceptionHandler;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public abstract class AbstractUserController {
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    protected ExceptionHandler exceptionHandler;
 
     public List<User> getAll() {
         log.info("getAll");
