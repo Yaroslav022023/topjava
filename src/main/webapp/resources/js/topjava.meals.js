@@ -12,6 +12,23 @@ const ctx = {
     }
 };
 
+$(document).ready(function () {
+    $('#dateTime').datetimepicker({
+        format: 'Y-m-d H:i',
+    });
+    $('#startDate, #endDate').datetimepicker({
+        format: 'Y-m-d',
+        timepicker: false
+    });
+    $('#startTime, #endTime').datetimepicker({
+        format: 'H:i',
+        datepicker: false
+    });
+    $('#editRow').on('shown.bs.modal', function () {
+        $('#dateTime').datetimepicker('refresh');
+    });
+});
+
 function clearFilter() {
     $("#filter")[0].reset();
     $.get(mealAjaxUrl, updateTableByData);
@@ -29,9 +46,9 @@ $(function () {
             "columns": [
                 {
                     "data": "dateTime",
-                    "render": function(data, type) {
+                    "render": function (data, type) {
                         if (type === "display" && data) {
-                            return data.replace("T", " ");
+                            return data.replace("T", " ").substring(0, 16);
                         }
                         return data;
                     }
@@ -53,7 +70,7 @@ $(function () {
                     "render": renderDeleteBtn
                 }
             ],
-            "createdRow": function(data, row) {
+            "createdRow": function (data, row) {
                 if (row.excess) {
                     $(data).addClass('excess');
                 } else {
