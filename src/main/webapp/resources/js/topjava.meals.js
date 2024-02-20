@@ -24,9 +24,6 @@ $(document).ready(function () {
         format: 'H:i',
         datepicker: false
     });
-    $('#editRow').on('shown.bs.modal', function () {
-        $('#dateTime').datetimepicker('refresh');
-    });
 });
 
 function clearFilter() {
@@ -71,11 +68,7 @@ $(function () {
                 }
             ],
             "createdRow": function (data, row) {
-                if (row.excess) {
-                    $(data).addClass('excess');
-                } else {
-                    $(data).addClass('non-excess');
-                }
+                row.excess ? $(data).addClass('excess') : $(data).addClass('non-excess');
             },
             "order": [
                 [

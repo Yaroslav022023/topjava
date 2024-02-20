@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.to.MealCreatUpdateTo;
 import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
-import ru.javawebinar.topjava.web.util.ExceptionHandler;
+import ru.javawebinar.topjava.web.HandlerException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,18 +25,12 @@ public abstract class AbstractMealController {
     private MealService service;
 
     @Autowired
-    protected ExceptionHandler exceptionHandler;
+    protected HandlerException handlerException;
 
     public Meal get(int id) {
         int userId = SecurityUtil.authUserId();
         log.info("get meal {} for user {}", id, userId);
         return service.get(id, userId);
-    }
-
-    public MealCreatUpdateTo getCreatUpdateTo(int id) {
-        int userId = SecurityUtil.authUserId();
-        log.info("get meal {} for user {}", id, userId);
-        return MealsUtil.createCreationTo(service.get(id, userId));
     }
 
     public void delete(int id) {
@@ -59,25 +52,11 @@ public abstract class AbstractMealController {
         return service.create(meal, userId);
     }
 
-    public Meal create(MealCreatUpdateTo mealCreatUpdateTo) {
-        int userId = SecurityUtil.authUserId();
-        log.info("create {} for user {}", mealCreatUpdateTo, userId);
-        checkNew(mealCreatUpdateTo);
-        return service.create(MealsUtil.createNewFromTo(mealCreatUpdateTo), userId);
-    }
-
     public void update(Meal meal, int id) {
         int userId = SecurityUtil.authUserId();
         log.info("update {} for user {}", meal, userId);
         assureIdConsistent(meal, id);
         service.update(meal, userId);
-    }
-
-    public void update(MealCreatUpdateTo mealCreatUpdateTo, int id) {
-        int userId = SecurityUtil.authUserId();
-        log.info("update {} for user {}", mealCreatUpdateTo, userId);
-        assureIdConsistent(mealCreatUpdateTo, id);
-        service.update(mealCreatUpdateTo, userId);
     }
 
     /**

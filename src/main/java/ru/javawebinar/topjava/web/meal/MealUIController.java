@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.javawebinar.topjava.to.MealCreatUpdateTo;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
 
 import javax.validation.Valid;
@@ -26,8 +26,8 @@ public class MealUIController extends AbstractMealController {
 
     @Override
     @GetMapping("/{id}")
-    public MealCreatUpdateTo getCreatUpdateTo(@PathVariable int id) {
-        return super.getCreatUpdateTo(id);
+    public Meal get(@PathVariable int id) {
+        return super.get(id);
     }
 
     @Override
@@ -39,15 +39,15 @@ public class MealUIController extends AbstractMealController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> createOrUpdate(@Valid MealCreatUpdateTo mealCreatUpdateTo, BindingResult result) {
+    public ResponseEntity<String> createOrUpdate(@Valid Meal meal, BindingResult result) {
         if (result.hasErrors()) {
-            return exceptionHandler.handleException(result);
+            return handlerException.handleException(result);
         }
 
-        if (mealCreatUpdateTo.isNew()) {
-            super.create(mealCreatUpdateTo);
+        if (meal.isNew()) {
+            super.create(meal);
         } else {
-            super.update(mealCreatUpdateTo, mealCreatUpdateTo.id());
+            super.update(meal, meal.id());
         }
         return ResponseEntity.ok().build();
     }

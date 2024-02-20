@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.web.util;
+package ru.javawebinar.topjava.web;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import org.springframework.validation.BindingResult;
 import java.util.stream.Collectors;
 
 @Component
-public class ExceptionHandler {
+public class HandlerException {
 
     public ResponseEntity<String> handleException(BindingResult result) {
         String errorFieldsMsg = result.getFieldErrors().stream()
