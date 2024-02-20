@@ -111,7 +111,10 @@
 </div>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
-<c:set var="i18nKeys" value='${["meal.add","meal.edit","common.deleted","common.saved",
-"common.errorStatus","common.confirm"]}'/>
+<c:set var="i18nKeys" value="" scope="request"/>
 <jsp:include page="fragments/common-scripts.jsp"/>
+<script type="text/javascript">
+    i18n["addTitle"] = '<spring:message code="meal.add"/>';
+    i18n["editTitle"] = '<spring:message code="meal.edit"/>';
+</script>
 </html>

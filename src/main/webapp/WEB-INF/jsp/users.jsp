@@ -78,7 +78,10 @@
 </div>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
-<c:set var="i18nKeys" value='${["user.add","user.edit","common.deleted","common.saved","common.enabled",
-"common.disabled","common.errorStatus","common.confirm"]}'/>
+<c:set var="i18nKeys" value="${'common.enabled,common.disabled'}" scope="request"/>
 <jsp:include page="fragments/common-scripts.jsp"/>
+<script type="text/javascript">
+    i18n["addTitle"] = '<spring:message code="user.add"/>';
+    i18n["editTitle"] = '<spring:message code="user.edit"/>';
+</script>
 </html>

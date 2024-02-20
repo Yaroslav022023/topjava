@@ -7,7 +7,7 @@ import org.springframework.validation.BindingResult;
 import java.util.stream.Collectors;
 
 @Component
-public class HandlerException {
+public class ExceptionHandler {
 
     public ResponseEntity<String> handleException(BindingResult result) {
         String errorFieldsMsg = result.getFieldErrors().stream()

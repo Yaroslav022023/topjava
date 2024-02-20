@@ -9,7 +9,7 @@ import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
-import ru.javawebinar.topjava.web.HandlerException;
+import ru.javawebinar.topjava.web.ExceptionHandler;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,7 +25,7 @@ public abstract class AbstractMealController {
     private MealService service;
 
     @Autowired
-    protected HandlerException handlerException;
+    protected ExceptionHandler exceptionHandler;
 
     public Meal get(int id) {
         int userId = SecurityUtil.authUserId();

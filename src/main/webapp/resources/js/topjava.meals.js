@@ -68,7 +68,7 @@ $(function () {
                 }
             ],
             "createdRow": function (data, row) {
-                row.excess ? $(data).addClass('excess') : $(data).addClass('non-excess');
+                $(data).addClass(row.excess ? 'excess' : 'non-excess');
             },
             "order": [
                 [
