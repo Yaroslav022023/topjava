@@ -111,12 +111,7 @@
 </div>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
-<script type="text/javascript">
-    const i18n = {}; // https://learn.javascript.ru/object
-    i18n["addTitle"] = '<spring:message code="meal.add"/>';
-    i18n["editTitle"] = '<spring:message code="meal.edit"/>';
-    <c:forEach var="key" items='${["common.deleted","common.saved", "common.errorStatus","common.confirm"]}'>
-    i18n["${key}"] = "<spring:message code="${key}"/>";
-    </c:forEach>
-</script>
+<c:set var="i18nKeys" value='${["meal.add","meal.edit","common.deleted","common.saved",
+"common.errorStatus","common.confirm"]}'/>
+<jsp:include page="fragments/common-scripts.jsp"/>
 </html>
