@@ -41,7 +41,7 @@
                 <button type="button" class="close" data-dismiss="modal" onclick="closeNoty()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="detailsForm">
+                <form id="detailsForm" accept-charset="UTF-8">
                     <input type="hidden" id="id" name="id">
 
                     <div class="form-group">
