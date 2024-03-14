@@ -24,7 +24,6 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
@@ -43,14 +42,14 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
     public ErrorInfo notFoundError(HttpServletRequest req, NotFoundException e, Locale locale) {
-        String typeMessage = getLocalizedMessage("common.notfoundError", new Object[]{}, locale);
+        String typeMessage = getLocalizedMessage(DATA_NOT_FOUND.getCode(), new Object[]{}, locale);
         return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, typeMessage, locale);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e, Locale locale) {
-        String typeMessage = getLocalizedMessage("common.conflictError", new Object[]{}, locale);
+        String typeMessage = getLocalizedMessage(DATA_ERROR.getCode(), new Object[]{}, locale);
         return logAndGetErrorInfo(req, e, true, DATA_ERROR, typeMessage, locale);
     }
 
@@ -58,14 +57,14 @@ public class ExceptionInfoHandler {
     @ExceptionHandler({IllegalRequestDataException.class, MethodArgumentTypeMismatchException.class,
             HttpMessageNotReadableException.class, BindException.class, MethodArgumentNotValidException.class})
     public ErrorInfo validationError(HttpServletRequest req, Exception e, Locale locale) {
-        String typeMessage = getLocalizedMessage("common.validationError", new Object[]{}, locale);
+        String typeMessage = getLocalizedMessage(VALIDATION_ERROR.getCode(), new Object[]{}, locale);
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, typeMessage, locale);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorInfo internalError(HttpServletRequest req, Exception e, Locale locale) {
-        String typeMessage = getLocalizedMessage("common.appError", new Object[]{}, locale);
+        String typeMessage = getLocalizedMessage(APP_ERROR.getCode(), new Object[]{}, locale);
         return logAndGetErrorInfo(req, e, true, APP_ERROR, typeMessage, locale);
     }
 
@@ -93,21 +92,12 @@ public class ExceptionInfoHandler {
     }
 
     private void formattingValidationError(BindException bindException, Set<String> details, Locale locale) {
-        bindException.getFieldErrors().forEach(fieldError -> {
-            String cause = Objects.requireNonNull(fieldError.getCode());
-            if ("NotNull".equals(cause) || "NotEmpty".equals(cause) || "NotBlank".equals(cause)) {
-                details.add(getLocalizedMessage("common.emptyError", new Object[]{fieldError.getField()}, locale));
-            }
-
-            if ("userTo".equals(fieldError.getObjectName()) || "user".equals(fieldError.getObjectName())) {
-                details.add(getLocalizedMessage("user." + fieldError.getField() + "Error", new Object[]{}, locale));
-            } else if ("meal".equals(fieldError.getObjectName())) {
-                details.add(getLocalizedMessage("meal." + fieldError.getField() + "Error", new Object[]{}, locale));
-            }
-        });
+        bindException.getFieldErrors().forEach(fieldError ->
+                details.add("[" + fieldError.getField() + "] " + messageSource.getMessage(fieldError, locale)));
     }
 
-    private void formattingConflictError(DataIntegrityViolationException dive, Set<String> details, Locale locale, String typeMessage) {
+    private void formattingConflictError(DataIntegrityViolationException dive, Set<String> details,
+                                         Locale locale, String typeMessage) {
         String constraint = dive.getMessage();
         if (constraint.contains("meal_unique_user_datetime_idx")) {
             details.add(getLocalizedMessage("meal.duplicateError", new Object[]{}, locale));

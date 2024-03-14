@@ -14,8 +14,9 @@ import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UsersUtil;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,9 +80,10 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("User with this email is already in the application"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("User with this email is already in the application");
     }
 
     @Test
@@ -108,15 +110,16 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("The size of [name] must be between 2 and 100"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[name] size must be between 2 and 128");
     }
 
     @Test
-    void updateInvalidEmail() throws Exception {
+    void updateInvalidName_2() throws Exception {
         UserTo updatedTo = getUpdatedTo();
-        updatedTo.setEmail("");
+        updatedTo.setName("");
         MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
@@ -124,10 +127,28 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(2, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("[email] must not be blank"));
-        assertTrue(responseBodyErrors.contains("[email] entered incorrectly"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(2)
+                .contains("[name] must not be blank")
+                .contains("[name] size must be between 2 and 128");
+    }
+
+    @Test
+    void updateInvalidEmail() throws Exception {
+        UserTo updatedTo = getUpdatedTo();
+        updatedTo.setEmail("abc");
+        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[email] must be a well-formed email address");
     }
 
     @Test
@@ -142,9 +163,10 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("User with this email is already in the application"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("User with this email is already in the application");
     }
 
     @Test
@@ -158,10 +180,11 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(2, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("[password] must not be blank"));
-        assertTrue(responseBodyErrors.contains("The size of [password] must be between 5 and 128"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(2)
+                .contains("[password] must not be blank")
+                .contains("[password] size must be between 5 and 128");
     }
 
     @Test

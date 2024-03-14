@@ -13,6 +13,9 @@ import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -45,9 +48,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("Data not found"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("Data not found");
     }
 
     @Test
@@ -89,9 +93,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("Data not found"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("Data not found");
     }
 
     @Test
@@ -109,7 +114,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
     @Test
     void updateInvalidName() throws Exception {
         User updated = getUpdated();
-        updated.setName(" ");
+        updated.setName("");
         MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL + USER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(admin))
@@ -117,10 +122,11 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(2, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("[name] must not be blank"));
-        assertTrue(responseBodyErrors.contains("The size of [name] must be between 2 and 100"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(2)
+                .contains("[name] must not be blank")
+                .contains("[name] size must be between 2 and 128");
     }
 
     @Test
@@ -134,9 +140,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("[email] entered incorrectly"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[email] must be a well-formed email address");
     }
 
     @Test
@@ -151,9 +158,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("User with this email is already in the application"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("User with this email is already in the application");
     }
 
     @Test
@@ -167,9 +175,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("The size of [password] must be between 5 and 128"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[password] size must be between 5 and 128");
     }
 
     @Test
@@ -200,9 +209,10 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("User with this email is already in the application"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("User with this email is already in the application");
     }
 
     @Test

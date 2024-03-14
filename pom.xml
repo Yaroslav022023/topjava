@@ -20,6 +20,7 @@
         <spring.security.version>5.8.8</spring.security.version>
         <spring-data-jpa.version>2.7.18</spring-data-jpa.version>
         <jackson.version>2.16.0</jackson.version>
+        <json-path>2.9.0</json-path>
         <tomcat.version>9.0.82</tomcat.version>
 
         <!-- Hibernate -->
@@ -256,7 +257,7 @@
                     <artifactId>jquery</artifactId>
                 </exclusion>
                 <exclusion>
-<!--                https://getbootstrap.com/docs/4.5/components/popovers         -->
+                    <!--                https://getbootstrap.com/docs/4.5/components/popovers         -->
                     <groupId>org.webjars</groupId>
                     <artifactId>popper.js</artifactId>
                 </exclusion>
@@ -299,6 +300,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json-path}</version>
         </dependency>
 
         <!--Test-->

@@ -16,6 +16,9 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -59,9 +62,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("Data not found"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("Data not found");
     }
 
     @Test
@@ -79,9 +83,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("Data not found"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("Data not found");
     }
 
     @Test
@@ -107,10 +112,11 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(2, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("[description] must not be blank"));
-        assertTrue(responseBodyErrors.contains("The size of [description] must be between 5 and 120"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(2)
+                .contains("[description] must not be blank")
+                .contains("[description] size must be between 2 and 120");
     }
 
     @Test
@@ -124,9 +130,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("The size of [calories] must be between 10 and 5000"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[calories] must be between 10 and 5000");
     }
 
     @Test
@@ -140,9 +147,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("The size of [calories] must be between 10 and 5000"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("[calories] must be between 10 and 5000");
     }
 
     @Test
@@ -157,9 +165,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("You already have food with this date/time"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("You already have food with this date/time");
     }
 
     @Test
@@ -190,9 +199,10 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andReturn();
 
-        responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertEquals(1, responseBodyErrors.size());
-        assertTrue(responseBodyErrors.contains("You already have food with this date/time"));
+        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
+        assertThat(responseBodyErrors)
+                .hasSize(1)
+                .contains("You already have food with this date/time");
     }
 
     @Test

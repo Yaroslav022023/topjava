@@ -17,8 +17,6 @@ import ru.javawebinar.topjava.Profiles;
 
 import javax.annotation.PostConstruct;
 
-import java.util.List;
-
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 
@@ -47,8 +45,6 @@ public abstract class AbstractControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
-    protected List<String> responseBodyErrors;
 
     protected void assumeDataJpa() {
         Assumptions.assumeTrue(env.acceptsProfiles(org.springframework.core.env.Profiles.of(Profiles.DATAJPA)), "DATA-JPA only");
