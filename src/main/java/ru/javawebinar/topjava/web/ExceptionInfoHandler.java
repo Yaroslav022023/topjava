@@ -42,30 +42,34 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
     public ErrorInfo notFoundError(HttpServletRequest req, NotFoundException e, Locale locale) {
-        String typeMessage = getLocalizedMessage(DATA_NOT_FOUND.getCode(), new Object[]{}, locale);
-        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, typeMessage, locale);
+        Set<String> details = new HashSet<>();
+        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, details, locale);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e, Locale locale) {
-        String typeMessage = getLocalizedMessage(DATA_ERROR.getCode(), new Object[]{}, locale);
-        return logAndGetErrorInfo(req, e, true, DATA_ERROR, typeMessage, locale);
+        Set<String> details = new HashSet<>();
+        formattingConflictError(e, details, locale);
+        return logAndGetErrorInfo(req, e, true, DATA_ERROR, details, locale);
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)  // 422
     @ExceptionHandler({IllegalRequestDataException.class, MethodArgumentTypeMismatchException.class,
             HttpMessageNotReadableException.class, BindException.class, MethodArgumentNotValidException.class})
     public ErrorInfo validationError(HttpServletRequest req, Exception e, Locale locale) {
-        String typeMessage = getLocalizedMessage(VALIDATION_ERROR.getCode(), new Object[]{}, locale);
-        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, typeMessage, locale);
+        Set<String> details = new HashSet<>();
+        if (e instanceof BindException bindException) {
+            formattingBindException(bindException, details, locale);
+        }
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, details, locale);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorInfo internalError(HttpServletRequest req, Exception e, Locale locale) {
-        String typeMessage = getLocalizedMessage(APP_ERROR.getCode(), new Object[]{}, locale);
-        return logAndGetErrorInfo(req, e, true, APP_ERROR, typeMessage, locale);
+        Set<String> details = new HashSet<>();
+        return logAndGetErrorInfo(req, e, true, APP_ERROR, details, locale);
     }
 
     private String getLocalizedMessage(String messageCode, Object[] args, Locale locale) {
@@ -74,37 +78,28 @@ public class ExceptionInfoHandler {
 
     //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
     private ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException,
-                                         ErrorType errorType, String typeMessage, Locale locale) {
-        Set<String> details = new HashSet<>();
-        generateMessage(e, details, locale, typeMessage);
+                                         ErrorType errorType, Set<String> details, Locale locale) {
+        String typeMessage = getLocalizedMessage(errorType.getCode(), new Object[]{}, locale);
         logging(req, logException, errorType, ValidationUtil.getRootCause(e), details);
+        if (details.isEmpty()) {
+            details.add(typeMessage);
+        }
         return new ErrorInfo(req.getRequestURL(), errorType, typeMessage, details);
     }
 
-    private void generateMessage(Exception e, Set<String> details, Locale locale, String typeMessage) {
-        if (e instanceof BindException bindException) {
-            formattingValidationError(bindException, details, locale);
-        } else if (e instanceof DataIntegrityViolationException dive) {
-            formattingConflictError(dive, details, locale, typeMessage);
-        } else {
-            details.add(typeMessage);
-        }
-    }
-
-    private void formattingValidationError(BindException bindException, Set<String> details, Locale locale) {
+    private void formattingBindException(BindException bindException, Set<String> details, Locale locale) {
         bindException.getFieldErrors().forEach(fieldError ->
                 details.add("[" + fieldError.getField() + "] " + messageSource.getMessage(fieldError, locale)));
     }
 
-    private void formattingConflictError(DataIntegrityViolationException dive, Set<String> details,
-                                         Locale locale, String typeMessage) {
-        String constraint = dive.getMessage();
+    private void formattingConflictError(DataIntegrityViolationException e, Set<String> details, Locale locale) {
+        String constraint = e.getMessage();
         if (constraint.contains("meal_unique_user_datetime_idx")) {
             details.add(getLocalizedMessage("meal.duplicateError", new Object[]{}, locale));
         } else if (constraint.contains("users_unique_email_idx")) {
             details.add(getLocalizedMessage("user.duplicateEmailError", new Object[]{}, locale));
         } else {
-            details.add(typeMessage);
+            details.add(constraint);
         }
     }
 

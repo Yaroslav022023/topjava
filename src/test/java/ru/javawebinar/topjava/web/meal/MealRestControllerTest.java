@@ -4,7 +4,6 @@ package ru.javawebinar.topjava.web.meal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Propagation;
@@ -12,19 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.util.exception.ErrorType;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.MealTestData.*;
-import static ru.javawebinar.topjava.TestJsonUtil.readExceptionsFromJson;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.UserTestData.user;
@@ -56,16 +52,15 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getNotFound() throws Exception {
-        MvcResult result = perform(MockMvcRequestBuilders.get(REST_URL + ADMIN_MEAL_ID)
+        perform(MockMvcRequestBuilders.get(REST_URL + ADMIN_MEAL_ID)
                 .with(userHttpBasic(user)))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("Data not found");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_NOT_FOUND.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data not found")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("Data not found")));
     }
 
     @Test
@@ -78,15 +73,14 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void deleteNotFound() throws Exception {
-        MvcResult result = perform(MockMvcRequestBuilders.delete(REST_URL + ADMIN_MEAL_ID)
+        perform(MockMvcRequestBuilders.delete(REST_URL + ADMIN_MEAL_ID)
                 .with(userHttpBasic(user)))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("Data not found");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_NOT_FOUND.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data not found")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("Data not found")));
     }
 
     @Test
@@ -105,52 +99,49 @@ class MealRestControllerTest extends AbstractControllerTest {
     void updateInvalidDescription() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setDescription(" ");
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(2)
-                .contains("[description] must not be blank")
-                .contains("[description] size must be between 2 and 120");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(2)))
+                .andExpect(jsonPath("$.details", hasItem("[description] must not be blank")))
+                .andExpect(jsonPath("$.details", hasItem("[description] size must be between 2 and 120")));
     }
 
     @Test
     void updateInvalidCaloriesMin() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setCalories(9);
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("[calories] must be between 10 and 5000");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("[calories] must be between 10 and 5000")));
     }
 
     @Test
     void updateInvalidCaloriesMax() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setCalories(5001);
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("[calories] must be between 10 and 5000");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("[calories] must be between 10 and 5000")));
     }
 
     @Test
@@ -158,17 +149,16 @@ class MealRestControllerTest extends AbstractControllerTest {
     void updateDuplicateDateTime() throws Exception {
         Meal updated = MealTestData.getUpdated();
         updated.setDateTime(meal2.getDateTime());
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isConflict())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("You already have food with this date/time");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data error")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("You already have food with this date/time")));
     }
 
     @Test
@@ -192,17 +182,16 @@ class MealRestControllerTest extends AbstractControllerTest {
     void createWithLocationDuplicateDateTime() throws Exception {
         Meal newMeal = MealTestData.getNew();
         newMeal.setDateTime(meal1.getDateTime());
-        MvcResult result = perform(MockMvcRequestBuilders.post(REST_URL)
+        perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(newMeal)))
                 .andExpect(status().isConflict())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("You already have food with this date/time");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data error")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("You already have food with this date/time")));
     }
 
     @Test

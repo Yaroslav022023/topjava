@@ -3,7 +3,6 @@ package ru.javawebinar.topjava.web.user;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Propagation;
@@ -12,15 +11,12 @@ import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UsersUtil;
+import ru.javawebinar.topjava.util.exception.ErrorType;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.javawebinar.topjava.TestJsonUtil.readExceptionsFromJson;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.*;
 import static ru.javawebinar.topjava.web.user.ProfileRestController.REST_URL;
@@ -74,16 +70,15 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void registerDuplicateEmail() throws Exception {
         UserTo newTo = new UserTo(null, "newName", user.getEmail(), "newPassword", 1500);
-        MvcResult result = perform(MockMvcRequestBuilders.post(REST_URL)
+        perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonWithPasswordTo(newTo, newTo.getPassword())))
                 .andExpect(status().isConflict())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("User with this email is already in the application");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data error")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("User with this email is already in the application")));
     }
 
     @Test
@@ -103,52 +98,49 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     void updateInvalidName() throws Exception {
         UserTo updatedTo = getUpdatedTo();
         updatedTo.setName("a");
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("[name] size must be between 2 and 128");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("[name] size must be between 2 and 128")));
     }
 
     @Test
-    void updateInvalidName_2() throws Exception {
+    void updateEmptyName() throws Exception {
         UserTo updatedTo = getUpdatedTo();
         updatedTo.setName("");
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(2)
-                .contains("[name] must not be blank")
-                .contains("[name] size must be between 2 and 128");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(2)))
+                .andExpect(jsonPath("$.details", hasItem("[name] must not be blank")))
+                .andExpect(jsonPath("$.details", hasItem("[name] size must be between 2 and 128")));
     }
 
     @Test
     void updateInvalidEmail() throws Exception {
         UserTo updatedTo = getUpdatedTo();
         updatedTo.setEmail("abc");
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("[email] must be a well-formed email address");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("[email] must be a well-formed email address")));
     }
 
     @Test
@@ -156,35 +148,33 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     void updateDuplicateEmail() throws Exception {
         UserTo updatedTo = getUpdatedTo();
         updatedTo.setEmail(admin.getEmail());
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
                 .andExpect(status().isConflict())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(1)
-                .contains("User with this email is already in the application");
+                .andExpect(jsonPath("$.type", is(ErrorType.DATA_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Data error")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(1)))
+                .andExpect(jsonPath("$.details", hasItem("User with this email is already in the application")));
     }
 
     @Test
     void updateInvalidPassword() throws Exception {
         UserTo updatedTo = getUpdatedTo();
         updatedTo.setPassword(" ");
-        MvcResult result = perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(jsonWithPasswordTo(updatedTo, updatedTo.getPassword())))
                 .andExpect(status().isUnprocessableEntity())
-                .andReturn();
-
-        List<String> responseBodyErrors = readExceptionsFromJson(result.getResponse().getContentAsString(), "details");
-        assertThat(responseBodyErrors)
-                .hasSize(2)
-                .contains("[password] must not be blank")
-                .contains("[password] size must be between 5 and 128");
+                .andExpect(jsonPath("$.type", is(ErrorType.VALIDATION_ERROR.toString())))
+                .andExpect(jsonPath("$.typeMessage", is("Error in entered data")))
+                .andExpect(jsonPath("$.details").isArray())
+                .andExpect(jsonPath("$.details", hasSize(2)))
+                .andExpect(jsonPath("$.details", hasItem("[password] must not be blank")))
+                .andExpect(jsonPath("$.details", hasItem("[password] size must be between 5 and 128")));
     }
 
     @Test
