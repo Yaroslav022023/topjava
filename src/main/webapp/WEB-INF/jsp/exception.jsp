@@ -7,20 +7,13 @@
 
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
-
 <div class="jumbotron">
     <div class="container text-center">
         <br>
-        <h4 class="my-3">${status}</h4>
-        <h2><spring:message code="common.appError"/></h2>
-        <h4 class="my-5">${message}</h4>
+        <h2 class="my-5">${typeMessage}</h2>
+        <h4 class="my-5">${details}</h4>
     </div>
 </div>
-<!--
-<c:forEach items="${exception.stackTrace}" var="stackTrace">
-    ${stackTrace}
-</c:forEach>
--->
 <jsp:include page="fragments/footer.jsp"/>
 </body>
 </html>

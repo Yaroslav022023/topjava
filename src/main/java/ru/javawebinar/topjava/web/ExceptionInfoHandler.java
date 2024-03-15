@@ -42,16 +42,24 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
     public ErrorInfo notFoundError(HttpServletRequest req, NotFoundException e, Locale locale) {
-        Set<String> details = new HashSet<>();
-        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, details, locale);
+        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, new HashSet<>(), locale);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e, Locale locale) {
+        return logAndGetErrorInfo(req, e, true, DATA_ERROR, formattingConflictError(e, locale), locale);
+    }
+
+    private Set<String> formattingConflictError(DataIntegrityViolationException e, Locale locale) {
         Set<String> details = new HashSet<>();
-        formattingConflictError(e, details, locale);
-        return logAndGetErrorInfo(req, e, true, DATA_ERROR, details, locale);
+        String constraint = e.getMessage();
+        if (constraint.contains("meal_unique_user_datetime_idx")) {
+            details.add(getLocalizedMessage("meal.duplicateError", locale));
+        } else if (constraint.contains("users_unique_email_idx")) {
+            details.add(getLocalizedMessage("user.duplicateEmailError", locale));
+        }
+        return details;
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)  // 422
@@ -65,42 +73,28 @@ public class ExceptionInfoHandler {
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, details, locale);
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public ErrorInfo internalError(HttpServletRequest req, Exception e, Locale locale) {
-        Set<String> details = new HashSet<>();
-        return logAndGetErrorInfo(req, e, true, APP_ERROR, details, locale);
-    }
-
-    private String getLocalizedMessage(String messageCode, Object[] args, Locale locale) {
-        return messageSource.getMessage(messageCode, args, locale);
-    }
-
-    //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
-    private ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException,
-                                         ErrorType errorType, Set<String> details, Locale locale) {
-        String typeMessage = getLocalizedMessage(errorType.getCode(), new Object[]{}, locale);
-        logging(req, logException, errorType, ValidationUtil.getRootCause(e), details);
-        if (details.isEmpty()) {
-            details.add(typeMessage);
-        }
-        return new ErrorInfo(req.getRequestURL(), errorType, typeMessage, details);
-    }
-
     private void formattingBindException(BindException bindException, Set<String> details, Locale locale) {
         bindException.getFieldErrors().forEach(fieldError ->
                 details.add("[" + fieldError.getField() + "] " + messageSource.getMessage(fieldError, locale)));
     }
 
-    private void formattingConflictError(DataIntegrityViolationException e, Set<String> details, Locale locale) {
-        String constraint = e.getMessage();
-        if (constraint.contains("meal_unique_user_datetime_idx")) {
-            details.add(getLocalizedMessage("meal.duplicateError", new Object[]{}, locale));
-        } else if (constraint.contains("users_unique_email_idx")) {
-            details.add(getLocalizedMessage("user.duplicateEmailError", new Object[]{}, locale));
-        } else {
-            details.add(constraint);
-        }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ErrorInfo internalError(HttpServletRequest req, Exception e, Locale locale) {
+        return logAndGetErrorInfo(req, e, true, APP_ERROR, new HashSet<>(), locale);
+    }
+
+    private String getLocalizedMessage(String messageCode, Locale locale) {
+        return messageSource.getMessage(messageCode, new Object[]{}, locale);
+    }
+
+    //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
+    private ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException,
+                                         ErrorType errorType, Set<String> details, Locale locale) {
+
+        String typeMessage = getLocalizedMessage(errorType.getCode(), locale);
+        logging(req, logException, errorType, ValidationUtil.getRootCause(e), details);
+        return new ErrorInfo(req.getRequestURL(), errorType, typeMessage, details);
     }
 
     private void logging(HttpServletRequest req, boolean logException, ErrorType errorType,

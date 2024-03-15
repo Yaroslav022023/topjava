@@ -46,8 +46,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.type", is(ErrorType.DATA_NOT_FOUND.toString())))
                 .andExpect(jsonPath("$.typeMessage", is("Data not found")))
                 .andExpect(jsonPath("$.details").isArray())
-                .andExpect(jsonPath("$.details", hasSize(1)))
-                .andExpect(jsonPath("$.details", hasItem("Data not found")));
+                .andExpect(jsonPath("$.details", hasSize(0)));
     }
 
     @Test
@@ -90,8 +89,7 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.type", is(ErrorType.DATA_NOT_FOUND.toString())))
                 .andExpect(jsonPath("$.typeMessage", is("Data not found")))
                 .andExpect(jsonPath("$.details").isArray())
-                .andExpect(jsonPath("$.details", hasSize(1)))
-                .andExpect(jsonPath("$.details", hasItem("Data not found")));
+                .andExpect(jsonPath("$.details", hasSize(0)));
     }
 
     @Test
