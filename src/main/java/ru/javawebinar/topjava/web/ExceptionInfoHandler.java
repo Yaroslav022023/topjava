@@ -2,7 +2,6 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,10 +31,10 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ExceptionInfoHandler {
     private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
-    private final MessageSource messageSource;
+    private final LocalizationService localizationService;
 
-    public ExceptionInfoHandler(MessageSource messageSource) {
-        this.messageSource = messageSource;
+    public ExceptionInfoHandler(LocalizationService localizationService) {
+        this.localizationService = localizationService;
     }
 
     //  http://stackoverflow.com/a/22358422/548473
@@ -55,9 +54,9 @@ public class ExceptionInfoHandler {
         Set<String> details = new HashSet<>();
         String constraint = e.getMessage();
         if (constraint.contains("meal_unique_user_datetime_idx")) {
-            details.add(getLocalizedMessage("meal.duplicateError", locale));
+            details.add(localizationService.getLocalizedMessage("meal.duplicateError", locale));
         } else if (constraint.contains("users_unique_email_idx")) {
-            details.add(getLocalizedMessage("user.duplicateEmailError", locale));
+            details.add(localizationService.getLocalizedMessage("user.duplicateEmailError", locale));
         }
         return details;
     }
@@ -75,7 +74,7 @@ public class ExceptionInfoHandler {
 
     private void formattingBindException(BindException bindException, Set<String> details, Locale locale) {
         bindException.getFieldErrors().forEach(fieldError ->
-                details.add("[" + fieldError.getField() + "] " + messageSource.getMessage(fieldError, locale)));
+                details.add("[" + fieldError.getField() + "] " + localizationService.getMessage(fieldError, locale)));
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -84,15 +83,11 @@ public class ExceptionInfoHandler {
         return logAndGetErrorInfo(req, e, true, APP_ERROR, new HashSet<>(), locale);
     }
 
-    private String getLocalizedMessage(String messageCode, Locale locale) {
-        return messageSource.getMessage(messageCode, new Object[]{}, locale);
-    }
-
     //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
     private ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException,
                                          ErrorType errorType, Set<String> details, Locale locale) {
 
-        String typeMessage = getLocalizedMessage(errorType.getCode(), locale);
+        String typeMessage = localizationService.getLocalizedMessage(errorType.getCode(), locale);
         logging(req, logException, errorType, ValidationUtil.getRootCause(e), details);
         return new ErrorInfo(req.getRequestURL(), errorType, typeMessage, details);
     }

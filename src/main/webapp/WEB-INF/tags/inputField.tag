@@ -7,9 +7,25 @@
 <%@ attribute name="inputType" required="false" description="Input type" %>
 
 <spring:bind path="${name}">
-    <div class="form-group ${status.error ? 'error' : '' }">
+    <div class="form-group ${status.error ? 'error' : ''}">
         <label class="col-form-label"><spring:message code="${labelCode}"/></label>
-        <form:input path="${name}" type="${(empty inputType)?'text':inputType}" class="form-control ${status.error ? 'is-invalid' : '' }"/>
-        <div class="invalid-feedback">${status.errorMessage}</div>
+        <form:input path="${name}" type="${(empty inputType) ? 'text' : inputType}"
+                    class="form-control ${status.error ? 'is-invalid' : ''}"/>
+        <c:choose>
+            <c:when test="${name == 'email'}">
+                <c:if test="${not empty emailError}">
+                    <div class="invalid-feedback" style="display: block;">${emailError}</div>
+                </c:if>
+                <c:if test="${empty emailError}">
+                    <div class="invalid-feedback">${status.errorMessage}</div>
+                </c:if>
+            </c:when>
+            <c:otherwise>
+                <div class="invalid-feedback">${status.errorMessage}</div>
+            </c:otherwise>
+        </c:choose>
     </div>
 </spring:bind>
+<c:if test="${not empty emailError}">
+</c:if>
+
