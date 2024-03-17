@@ -8,13 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.util.ValidationUtil;
-import ru.javawebinar.topjava.util.exception.ErrorType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-
-import static ru.javawebinar.topjava.util.exception.ErrorType.APP_ERROR;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,6 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ModelAndView defaultErrorHandler(HttpServletRequest req, Exception e) {
+        log.error("Exception at request " + req.getRequestURL(), e);
         Throwable rootCause = ValidationUtil.getRootCause(e);
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         Map<String, Object> details = new HashMap<>(Map.of(
@@ -29,13 +27,10 @@ public class GlobalExceptionHandler {
                 "message", rootCause.toString(),
                 "status", httpStatus
         ));
-        return logAndCreateModel(req, e, true, APP_ERROR, details, "exception", httpStatus);
+        return createModel(details, "exception", httpStatus);
     }
 
-    private ModelAndView logAndCreateModel(HttpServletRequest req, Exception e, boolean logException,
-                                           ErrorType errorType, Map<String, Object> details, String viewName,
-                                           HttpStatus httpStatus) {
-        logging(req, logException, errorType, ValidationUtil.getRootCause(e), details);
+    private ModelAndView createModel(Map<String, Object> details, String viewName, HttpStatus httpStatus) {
         ModelAndView mav = new ModelAndView(viewName, details);
         mav.setStatus(httpStatus);
 
@@ -44,14 +39,5 @@ public class GlobalExceptionHandler {
             mav.addObject("userTo", authorizedUser.getUserTo());
         }
         return mav;
-    }
-
-    private void logging(HttpServletRequest req, boolean logException, ErrorType errorType,
-                         Throwable rootCause, Map<String, Object> details) {
-        if (logException) {
-            log.error("{} at request {}: ", errorType.toString(), req.getRequestURL(), rootCause);
-        } else {
-            log.warn("{} at request {}: {}", errorType.toString(), req.getRequestURL(), details);
-        }
     }
 }
