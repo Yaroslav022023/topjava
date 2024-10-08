@@ -9,6 +9,7 @@
 Participation in the development of a full-featured enterprise Spring 5 / JPA
 application with role-based access control, database storage, and built from
 scratch.
+
 -------------------------------------------------------------
 
 ### Achievements:
