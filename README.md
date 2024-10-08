@@ -33,4 +33,5 @@ Java 21, Spring Framework, Spring MVC, Spring Security, Spring Data JPA,
 Hibernate, REST, PostgreSQL, HSQLDB, Tomcat, Spring JDBC Template, Bootstrap,
 jQuery, Datatables, Springfox Swagger 2, JUnit, Maven, Git, Lombok, Ehcache,
 Logback.
+
 -------------------------------------------------------------
